@@ -1,6 +1,7 @@
-FROM ubuntu:20.04
+# From https://github.com/kaust-vislab/python-data-science-project
+FROM ubuntu:18.04
 
-LABEL maintainer="DanielAnderson <da916@ic.ac.uk>"
+LABEL maintainer="danielanderson <da916@ic.ac.uk>"
 
 SHELL [ "/bin/bash", "--login", "-c" ]
 
@@ -26,7 +27,7 @@ COPY docker/sshd_config /etc/ssh
 RUN echo "Defaults rootpw" >> /etc/sudoers
 
 # Create a non-root user
-ARG username=poppunk-usr
+ARG username=bacquerya-usr
 ARG uid=1000
 ARG gid=100
 ENV USER $username
@@ -71,6 +72,8 @@ RUN conda init bash
 # create a project directory inside user home
 ENV PROJECT_DIR $HOME/app
 RUN mkdir $PROJECT_DIR
+# copy the code in
+COPY . $PROJECT_DIR
 WORKDIR $PROJECT_DIR
 
 # build the conda environment
@@ -78,8 +81,11 @@ ENV ENV_PREFIX $PROJECT_DIR/env
 RUN conda update --name base --channel defaults conda && \
     conda env create --prefix $ENV_PREFIX --file /tmp/environment.yml --force && \
     conda clean --all --yes
+# build and install extensions
+RUN conda activate $ENV_PREFIX
 
-# use an entrypoint script to ensure conda environment is properly activated at runtime
+# use an entrypoint script to insure conda environment is properly activated at runtime
+USER root
 ENTRYPOINT [ "/usr/local/bin/entrypoint.sh" ]
 
 # default command will be to launch flask server for deployment
@@ -91,5 +97,5 @@ CMD [ "gunicorn", \
       "--log-file=-", \
       "--timeout", "600", \
       "--workers=2", "--threads=2", "--worker-class=gthread", \
-      "--chdir", "Bacquerya_api", \
+      "--chdir", "BacQuerya_api", \
       "api:app" ]

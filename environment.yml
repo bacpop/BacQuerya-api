@@ -10,4 +10,5 @@ dependencies:
   - tqdm
   - flask
   - flask-cors
+  - gunicorn
   #- cobs
