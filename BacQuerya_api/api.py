@@ -10,9 +10,16 @@ from urllib.parse import unquote
 
 from paper_search import search_pubmed
 
-sys.path.insert(1, '..')
+# data locations
+gene_dir = '/home/bacquerya-usr/' + os.getenv('GENE_FILES')
 
-app = Flask(__name__)
+app = Flask(__name__, instance_relative_config=True)
+app.config.update(
+    TESTING=True,
+    SCHEDULER_API_ENABLED=True,
+    SECRET_KEY=os.environ.get('FLASK_SECRET_KEY')
+)
+
 CORS(app, expose_headers='Authorization')
 
 @app.route('/sequence', methods=['POST'])
@@ -25,12 +32,12 @@ def postSeqResult():
         query_sequence = sequence_dict['searchTerm']
         # search for uploaded sequence in COBS index
         sys.stderr.write("\nSearching COBS index\n")
-        index_name = "index_genes/31_index.cobs_compact"
+        index_name = os.path.join(gene_dir, "31_index.cobs_compact.json")
         index = cobs.Search(index_name)
         result = index.search(query_sequence, threshold = 0.8)
         # load metadata for identified sequences
         sys.stderr.write("\nLoading gene metadata\n")
-        with open("extracted_genes/panarooPairs.json") as f:
+        with open(os.path.join(gene_dir, "panarooPairs.json")) as f:
             geneJSON = f.read()
         genePairs = json.loads(geneJSON)
         query_length = len(query_sequence)
@@ -68,6 +75,5 @@ def paperSearch():
         return jsonify({"result": searchResult})
 
 if __name__ == "__main__":
-    app.secret_key = os.urandom(24)
     app.run(debug=False,use_reloader=False)
 
