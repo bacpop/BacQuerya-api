@@ -11,4 +11,3 @@ dependencies:
   - flask
   - flask-cors
   - gunicorn
-  #- cobs
