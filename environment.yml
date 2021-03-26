@@ -1,0 +1,14 @@
+name: BQ_api
+channels:
+  - conda-forge
+  - bioconda
+  - defaults
+dependencies:
+  - python
+  - numpy
+  - biopython
+  - tqdm
+  - flask
+  - flask-cors
+  - gunicorn
+  #- cobs

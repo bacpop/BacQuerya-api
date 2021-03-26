@@ -127,3 +127,8 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+# large files
+
+extracted_genes/
+index_genes/
