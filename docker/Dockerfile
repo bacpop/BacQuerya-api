@@ -1,5 +1,5 @@
 # From https://github.com/kaust-vislab/python-data-science-project
-FROM ubuntu:18.04
+FROM ubuntu:20.04
 
 LABEL maintainer="danielanderson <da916@ic.ac.uk>"
 
@@ -19,8 +19,6 @@ RUN apt-get update \
   && apt-get install -y --no-install-recommends openssh-server \
   && apt-get update \
   && apt-get install -y --no-install-recommends sudo \
-  && apt-get update \
-  && apt-get install -y --no-install-recommends build-essential zlib1g-dev automake autoconf \
   && echo "$SSH_PASSWD" | chpasswd
 COPY docker/sshd_config /etc/ssh
 # Use root password for sudo access
