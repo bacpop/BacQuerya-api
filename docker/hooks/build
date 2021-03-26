@@ -3,5 +3,5 @@ set -ex
 
 docker image build \
     --tag "$DOCKER_REPO:latest" \
-    --file docker/Dockerfile \
-    ./
+    --file Dockerfile \
+    ../
