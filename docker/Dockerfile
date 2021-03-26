@@ -41,8 +41,8 @@ RUN adduser --disabled-password \
     $USER
 RUN usermod -aG sudo $USER
 
-COPY environment.yml /tmp/
-RUN chown $UID:$GID /tmp/environment.yml
+COPY environment.yml requirements.txt /tmp/
+RUN chown $UID:$GID /tmp/environment.yml /tmp/requirements.txt
 
 COPY docker/entrypoint.sh /usr/local/bin/
 RUN chown $UID:$GID /usr/local/bin/entrypoint.sh && \
