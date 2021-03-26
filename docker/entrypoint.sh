@@ -3,8 +3,7 @@ set -e
 
 echo $ROOT_PASSWD | sudo -S service ssh start
 
-cp -r /$GENE_DICT_FILE $HOME/$GENE_DICT_FILE
-cp -r /$GENE_INDEX $HOME/$GENE_INDEX
+cp -r /$GENE_FILES $HOME/$GENE_FILES
 
 conda activate $HOME/app/env
 exec "$@"
