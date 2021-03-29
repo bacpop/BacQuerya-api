@@ -8,7 +8,7 @@ SHELL [ "/bin/bash", "--login", "-c" ]
 ENV DEBIAN_FRONTEND=noninteractive
 
 RUN apt-get update --fix-missing && \
-    apt-get install -y wget bzip2 curl git cmake g++ zlib1g-dev && \
+    apt-get install -y wget bzip2 curl git cmake g++ zlib1g-dev python3-pip && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
@@ -85,7 +85,7 @@ RUN conda update --name base --channel defaults conda && \
 RUN conda activate $ENV_PREFIX
 
 # install latest COBS
-RUN pip install --requirement /tmp/requirements.txt
+RUN pip install cobs_index
 RUN git clone --recursive https://github.com/bingmann/cobs.git && cd cobs && python setup.py install && cd ..
 
 # use an entrypoint script to insure conda environment is properly activated at runtime
