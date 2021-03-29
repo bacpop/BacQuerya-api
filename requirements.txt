@@ -1,1 +1,1 @@
-cobs-index
+cobs_index
