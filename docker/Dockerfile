@@ -8,7 +8,7 @@ SHELL [ "/bin/bash", "--login", "-c" ]
 ENV DEBIAN_FRONTEND=noninteractive
 
 RUN apt-get update --fix-missing && \
-    apt-get install -y wget bzip2 curl git cmake g++ zlib1g-dev && \
+    apt-get install -y wget bzip2 curl git cmake g++ zlib1g-dev python3-pip && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
