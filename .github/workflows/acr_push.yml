@@ -3,7 +3,7 @@ name: Build and push Docker image (Azure Container Registry)
 on:
   push:
     branches:
-      - docker
+      - main
 
 jobs:
     acr-upload:
