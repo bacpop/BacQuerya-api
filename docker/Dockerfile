@@ -82,6 +82,9 @@ RUN conda update --name base --channel defaults conda && \
 # build and install extensions
 RUN conda activate $ENV_PREFIX
 
+# install latest COBS
+RUN git clone https://github.com/bingmann/cobs.git && cd cobs && python setup.py install
+
 # use an entrypoint script to insure conda environment is properly activated at runtime
 USER root
 ENTRYPOINT [ "/usr/local/bin/entrypoint.sh" ]
