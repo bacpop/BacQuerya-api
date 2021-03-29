@@ -11,6 +11,6 @@ dependencies:
   - flask
   - flask-cors
   - gunicorn
-  - cmake
   - boost-cpp
   - pybind11
+  - zlib
