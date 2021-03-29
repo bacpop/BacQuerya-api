@@ -85,7 +85,7 @@ RUN conda update --name base --channel defaults conda && \
 RUN conda activate $ENV_PREFIX
 
 # install latest COBS
-RUN pip install --requirement /tmp/requirements.txt
+RUN pip install cobs_index
 RUN git clone --recursive https://github.com/bingmann/cobs.git && cd cobs && python setup.py install && cd ..
 
 # use an entrypoint script to insure conda environment is properly activated at runtime
