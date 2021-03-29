@@ -69,9 +69,11 @@ def paperSearch():
         if searchDict["source"] == "URL":
             maxResults = 1
             searchTerm = unquote(searchTerm)
+        sys.stderr.write("\nSearching for term in PubMed\n")
         searchResult = search_pubmed(searchTerm,
                                      "",
                                      maxResults)
+        sys.stderr.write("\nPosting results to frontend\n")
         return jsonify({"result": searchResult})
 
 if __name__ == "__main__":
