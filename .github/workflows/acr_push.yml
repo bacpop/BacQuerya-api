@@ -21,9 +21,9 @@ jobs:
         - name: 'Build and push image'
           uses: azure/docker-login@v1
           with:
-            login-server: ${{ secrets.REGISTRY_LOGIN_SERVER }}
+            login-server: bacquerya.azurecr.io
             username: ${{ secrets.AZURE_REGISTRY_USERNAME }}
             password: ${{ secrets.AZURE_REGISTRY_PASSWORD }}
         - run: |
-            docker build . -t ${{ secrets.REGISTRY_LOGIN_SERVER }}/bacquerya_api:latest
-            docker push ${{ secrets.REGISTRY_LOGIN_SERVER }}/bacquerya_api:latest
+            docker build . -t bacquerya.azurecr.io/bacquerya_api:latest
+            docker push bacquerya.azurecr.io/bacquerya_api:latest
