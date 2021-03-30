@@ -25,5 +25,5 @@ jobs:
             username: ${{ secrets.AZURE_REGISTRY_USERNAME }}
             password: ${{ secrets.AZURE_REGISTRY_PASSWORD }}
         - run: |
-            docker build --file docker/Dockerfile -t ${{ secrets.REGISTRY_LOGIN_SERVER }}/bacquerya_api:latest .
-            docker push ${{ secrets.REGISTRY_LOGIN_SERVER }}/bacquerya_api:latest
+            docker build --file docker/Dockerfile -t bacquerya.azurecr.io/bacquerya_api:latest .
+            docker push bacquerya.azurecr.io/bacquerya_api:latest

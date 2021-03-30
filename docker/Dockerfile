@@ -43,8 +43,8 @@ RUN adduser --disabled-password \
     $USER
 RUN usermod -aG sudo $USER
 
-COPY environment.yml /tmp/
-RUN chown $UID:$GID /tmp/environment.yml
+COPY environment.yml requirements.txt /tmp/
+RUN chown $UID:$GID /tmp/environment.yml /tmp/requirements.txt
 
 COPY docker/entrypoint.sh /usr/local/bin/
 RUN chown $UID:$GID /usr/local/bin/entrypoint.sh && \
@@ -85,7 +85,6 @@ RUN conda update --name base --channel defaults conda && \
 RUN conda activate $ENV_PREFIX
 
 # install latest COBS
-RUN pip install cobs_index
 RUN git clone --recursive https://github.com/bingmann/cobs.git && cd cobs && python setup.py install && cd ..
 
 # use an entrypoint script to insure conda environment is properly activated at runtime
