@@ -88,9 +88,6 @@ RUN conda activate $ENV_PREFIX
 USER root
 ENTRYPOINT [ "/usr/local/bin/entrypoint.sh" ]
 
-# install latest COBS
-RUN git clone --recursive https://github.com/bingmann/cobs.git && cd cobs && python setup.py install && cd ..
-
 # default command will be to launch flask server for deployment
 # see https://pythonspeed.com/articles/gunicorn-in-docker/
 EXPOSE 8000 2222
