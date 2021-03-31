@@ -32,7 +32,7 @@ def postSeqResult():
         query_sequence = sequence_dict['searchTerm']
         # search for uploaded sequence in COBS index
         sys.stderr.write("\nSearching COBS index\n")
-        index_name = os.path.join(gene_dir, "31_index.cobs_compact.json")
+        index_name = os.path.join(gene_dir, "31_index.cobs_compact")
         index = cobs.Search(index_name)
         result = index.search(query_sequence, threshold = 0.8)
         # load metadata for identified sequences
