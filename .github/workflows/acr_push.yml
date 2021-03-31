@@ -17,16 +17,17 @@ jobs:
           uses: azure/login@v1
           with:
             creds: ${{ secrets.AZURE_CREDENTIALS }}
-
+        - name: Step 2 - GitHub Action if statement (true)
+          env: 
+             WHO_TO_TRUST: ${{ secrets.TEST_SECRET }}
+          if:  env.WHO_TO_TRUST == 'TrustNo1'
+          run: echo "I know what the secret token is!"
         - name: 'Build and push image'
           uses: azure/docker-login@v1
           with:
             login-server: ${{ secrets.REGISTRY_LOGIN_SERVER }}
             username: ${{ secrets.AZURE_REGISTRY_USERNAME }}
             password: ${{ secrets.AZURE_REGISTRY_PASSWORD }}
-          env: 
-            TEST_SECRET: ${{ secrets.TEST_SECRET }}
         - run: |
-            echo env.TEST_SECRET
             docker build --file docker/Dockerfile -t bacquerya.azurecr.io/bacquerya_api:latest .
             docker push bacquerya.azurecr.io/bacquerya_api:latest
