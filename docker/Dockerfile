@@ -8,7 +8,7 @@ SHELL [ "/bin/bash", "--login", "-c" ]
 ENV DEBIAN_FRONTEND=noninteractive
 
 RUN apt-get update --fix-missing && \
-    apt-get install -y wget bzip2 curl git cmake g++ zlib1g-dev python3-pip && \
+    apt-get install -y wget bzip2 curl git cmake g++ zlib1g-dev && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
@@ -43,8 +43,8 @@ RUN adduser --disabled-password \
     $USER
 RUN usermod -aG sudo $USER
 
-COPY environment.yml requirements.txt /tmp/
-RUN chown $UID:$GID /tmp/environment.yml /tmp/requirements.txt
+COPY environment.yml /tmp/
+RUN chown $UID:$GID /tmp/environment.yml
 
 COPY docker/entrypoint.sh /usr/local/bin/
 RUN chown $UID:$GID /usr/local/bin/entrypoint.sh && \
@@ -81,12 +81,13 @@ ENV ENV_PREFIX $PROJECT_DIR/env
 RUN conda update --name base --channel defaults conda && \
     conda env create --prefix $ENV_PREFIX --file /tmp/environment.yml --force && \
     conda clean --all --yes
-# build and install extensions
-RUN conda activate $ENV_PREFIX
 
-# install latest COBS
-RUN pip3 install -r /tmp/requirements.txt
-RUN git clone --recursive https://github.com/bingmann/cobs.git && cd cobs && python setup.py install && cd ..
+# build and install extensions
+RUN conda activate $ENV_PREFIX && \
+ git clone --recursive https://github.com/bingmann/cobs.git && \
+ pushd cobs && \
+ $ENV_PREFIX/bin/python setup.py install && \
+ popd
 
 # use an entrypoint script to insure conda environment is properly activated at runtime
 USER root
