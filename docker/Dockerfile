@@ -81,12 +81,6 @@ ENV ENV_PREFIX $PROJECT_DIR/env
 RUN conda update --name base --channel defaults conda && \
     conda env create --prefix $ENV_PREFIX --file /tmp/environment.yml --force && \
     conda clean --all --yes
-# build and install extensions
-RUN conda activate $ENV_PREFIX
-
-# install latest COBS
-RUN pip3 install -r /tmp/requirements.txt
-RUN git clone --recursive https://github.com/bingmann/cobs.git && cd cobs && python setup.py install && cd ..
 
 # use an entrypoint script to insure conda environment is properly activated at runtime
 USER root

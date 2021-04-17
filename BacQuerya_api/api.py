@@ -3,12 +3,14 @@ from flask import Flask, request, jsonify
 from flask_cors import CORS, cross_origin
 import json
 import os
+import shutil
 import sys
 from tqdm import tqdm
 from types import SimpleNamespace
 from urllib.parse import unquote
 
 from paper_search import search_pubmed
+from bulk_download import getDownloadLink
 
 # data locations
 gene_dir = '/home/bacquerya-usr/' + os.getenv('GENE_FILES')
@@ -75,6 +77,22 @@ def paperSearch():
                                      maxResults)
         sys.stderr.write("\nPosting results to frontend\n")
         return jsonify({"result": searchResult})
+
+@app.route('/bulk_download', methods=['POST'])
+@cross_origin()
+def paperSearch():
+    if not request.json:
+        return "not a json post"
+    if request.json:
+        output_dir = "genomic_sequences"
+        n_cpu = 2
+        if not os.path.exists(output_dir):
+            os.mkdir(output_dir)
+        urlDict = request.json
+        urlList = urlDict["sequenceURLs"]
+        downloadURL = getDownloadLink(urlList, output_dir, n_cpu)
+        shutil.rmtree(output_dir)
+        return jsonify({"downloadURL": downloadURL})
 
 if __name__ == "__main__":
     app.run(debug=False,use_reloader=False)
