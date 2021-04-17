@@ -8,7 +8,7 @@ SHELL [ "/bin/bash", "--login", "-c" ]
 ENV DEBIAN_FRONTEND=noninteractive
 
 RUN apt-get update --fix-missing && \
-    apt-get install -y wget bzip2 curl git cmake g++ zlib1g-dev python3-pip && \
+    apt-get install -y wget bzip2 curl git cmake g++ zlib1g-dev && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
@@ -43,8 +43,8 @@ RUN adduser --disabled-password \
     $USER
 RUN usermod -aG sudo $USER
 
-COPY environment.yml requirements.txt /tmp/
-RUN chown $UID:$GID /tmp/environment.yml /tmp/requirements.txt
+COPY environment.yml /tmp/
+RUN chown $UID:$GID /tmp/environment.yml
 
 COPY docker/entrypoint.sh /usr/local/bin/
 RUN chown $UID:$GID /usr/local/bin/entrypoint.sh && \
