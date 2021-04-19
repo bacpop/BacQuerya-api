@@ -28,8 +28,7 @@ def getDownloadLink(urlList, output_dir, n_cpu):
     sys.stderr.write("\Tarring sequence files\n")
     os.chdir("..")
     subprocess.call(['tar', '-czf', "compressed_genomic_sequences.tar.gz", output_dir])
-
-    return "done downloading"
+    return "Done downloading"
 
 def send_email(target_email, downloadLink):
     msg = MIMEMultipart()
