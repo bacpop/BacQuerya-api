@@ -80,7 +80,7 @@ def paperSearch():
 
 @app.route('/bulk_download', methods=['POST'])
 @cross_origin()
-def paperSearch():
+def bulkDownload():
     if not request.json:
         return "not a json post"
     if request.json:
