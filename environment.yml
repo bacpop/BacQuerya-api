@@ -15,4 +15,3 @@ dependencies:
   - zlib
   - cobs
   - joblib
-  - certifi

@@ -10,7 +10,7 @@ from types import SimpleNamespace
 from urllib.parse import unquote
 
 from paper_search import search_pubmed
-from bulk_download import getDownloadLink
+from bulk_download import getDownloadLink, send_email
 
 # data locations
 gene_dir = '/home/bacquerya-usr/' + os.getenv('GENE_FILES')
@@ -91,6 +91,8 @@ def bulkDownload():
         urlDict = request.json
         urlList = urlDict["sequenceURLs"]
         downloadURL = getDownloadLink(urlList, output_dir, n_cpu)
+        if not (urlDict["email"] == "Enter email" or urlDict["email"].replace(" ", "") == ""):
+            send_email(urlDict["email"], downloadURL)
         shutil.rmtree(output_dir)
         return jsonify({"downloadURL": downloadURL})
 
