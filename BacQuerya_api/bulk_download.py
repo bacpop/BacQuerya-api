@@ -4,7 +4,6 @@ from joblib import Parallel, delayed
 import os
 import smtplib
 import subprocess
-import ssl
 import sys
 from tqdm import tqdm
 import urllib.request
