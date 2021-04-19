@@ -13,3 +13,4 @@ dependencies:
   - boost-cpp
   - pybind11
   - zlib
+  - cobs

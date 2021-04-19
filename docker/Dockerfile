@@ -82,13 +82,6 @@ RUN conda update --name base --channel defaults conda && \
     conda env create --prefix $ENV_PREFIX --file /tmp/environment.yml --force && \
     conda clean --all --yes
 
-# build and install extensions
-RUN conda activate $ENV_PREFIX && \
- git clone --recursive https://github.com/bingmann/cobs.git && \
- pushd cobs && \
- $ENV_PREFIX/bin/python setup.py install && \
- popd
-
 # use an entrypoint script to insure conda environment is properly activated at runtime
 USER root
 ENTRYPOINT [ "/usr/local/bin/entrypoint.sh" ]
