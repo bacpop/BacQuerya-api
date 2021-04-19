@@ -13,13 +13,6 @@ def download_sequence(url):
 def getDownloadLink(urlList, output_dir, n_cpu):
     os.chdir(output_dir)
     sys.stderr.write("\nDownloading sequence files\n")
-    # create ssl unverified context
-    try:
-        ssl._create_unverified_context
-    except AttributeError:
-        pass
-    else:
-        ssl._create_default_https_context = ssl._create_unverified_context
     # parallelise sequence download
     job_list = [
         urlList[i:i + n_cpu] for i in range(0, len(urlList), n_cpu)
