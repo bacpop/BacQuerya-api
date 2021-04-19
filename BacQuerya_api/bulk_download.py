@@ -8,7 +8,8 @@ import sys
 from tqdm import tqdm
 import urllib.request
 
-from secrets import SOURCE_ADDRESS, SOURCE_PASSWORD
+SOURCE_ADDRESS = os.getenv('SOURCE_ADDRESS')
+SOURCE_PASSWORD = os.getenv('SOURCE_PASSWORD')
 
 def download_sequence(url):
     url_label = os.path.basename(url)
