@@ -130,3 +130,6 @@ dmypy.json
 
 # important files
 gene_test_files/
+
+# secrets
+BacQuerya_api/secrets.py
