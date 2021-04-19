@@ -46,6 +46,3 @@ def send_email(target_email, downloadLink):
     s.send_message(msg)
     s.quit()
     return
-
-if __name__ == '__main__':
-    send_email("danp.anderson@outlook.com", "")
