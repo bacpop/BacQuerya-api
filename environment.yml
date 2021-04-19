@@ -14,3 +14,4 @@ dependencies:
   - pybind11
   - zlib
   - cobs
+  - joblib
