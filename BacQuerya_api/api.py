@@ -78,7 +78,7 @@ def paperSearch():
         sys.stderr.write("\nPosting results to frontend\n")
         return jsonify({"result": searchResult})
 
-@app.route('/bulk_download', methods=['POST'])
+@app.route('/bulkSequences', methods=['POST'])
 @cross_origin()
 def bulkDownload():
     if not request.json:
