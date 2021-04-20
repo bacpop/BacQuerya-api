@@ -29,9 +29,10 @@ def getDownloadLink(urlList, output_dir, temp_dir, raw_temp_dir, n_cpu):
         Parallel(n_jobs=n_cpu)(delayed(download_sequence)(url) for url in job)
 
     sys.stderr.write("\nTarring sequence files\n")
-    os.chdir(current_dir)
+    os.chdir("..")
     filePath = os.path.join(os.path.basename(temp_dir), "compressed_genomic_sequences.tar.gz")
-    subprocess.call(['tar', '-czf', os.path.join(output_dir, filePath), raw_temp_dir])
+    subprocess.call(['tar', '-czf', filePath, os.path.basename(raw_temp_dir)])
+    os.chdir(current_dir)
     return filePath
 
 def send_email(target_email, downloadLink):
