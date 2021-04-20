@@ -89,15 +89,15 @@ def bulkDownload():
     if not request.json:
         return "not a json post"
     if request.json:
-        output_dir = "genomic_sequences"
+        output_dir = os.path.join(gene_dir, "genomic_sequences")
         n_cpu = 2
         if not os.path.exists(output_dir):
             os.mkdir(output_dir)
-        # currently hard coded and overwritten, will later change to tempdir that is removed after 24 hours
-        temp_dir = "genomic_sequences/requested_files"
-        raw_temp_dir = "genomic_sequences/requested_files/raw_files"
         #temp_dir = tempfile.mkdtemp(dir=output_dir)
         #raw_temp_dir = tempfile.mkdtemp(dir=temp_dir)
+        # currently hard coded and overwritten, will later change to tempdir that is removed after 24 hours
+        temp_dir = os.path.join(output_dir, "requested_files")
+        raw_temp_dir = os.path.join(temp_dir, "raw_files")
         if not os.path.exists(temp_dir):
             os.mkdir(temp_dir)
         if not os.path.exists(raw_temp_dir):
@@ -131,7 +131,7 @@ def serve_file(token):
 @app.route('/download_link/<path:filepath>')
 def download_link(filepath):
     """Serve compressed genomic sequence file"""
-    return send_file(os.path.join("../genomic_sequences", filepath), as_attachment=True)
+    return send_file(os.path.join("..", gene_dir, "genomic_sequences", filepath), as_attachment=True)
 
 if __name__ == "__main__":
     app.run(debug=False,use_reloader=False)
