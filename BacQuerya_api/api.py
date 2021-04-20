@@ -1,10 +1,12 @@
 import cobs_index as cobs
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, send_file, url_for, render_template
 from flask_cors import CORS, cross_origin
+from itsdangerous import TimedJSONWebSignatureSerializer as Serializer
 import json
 import os
 import shutil
 import sys
+import tempfile
 from tqdm import tqdm
 from types import SimpleNamespace
 from urllib.parse import unquote
@@ -14,12 +16,12 @@ from bulk_download import getDownloadLink, send_email
 
 # data locations
 gene_dir = '/home/bacquerya-usr/' + os.getenv('GENE_FILES')
-
+SECRET_KEY = os.environ.get('FLASK_SECRET_KEY')
 app = Flask(__name__, instance_relative_config=True)
 app.config.update(
     TESTING=True,
     SCHEDULER_API_ENABLED=True,
-    SECRET_KEY=os.environ.get('FLASK_SECRET_KEY')
+    SECRET_KEY=SECRET_KEY
 )
 
 CORS(app, expose_headers='Authorization')
@@ -27,6 +29,7 @@ CORS(app, expose_headers='Authorization')
 @app.route('/sequence', methods=['POST'])
 @cross_origin()
 def postSeqResult():
+    """Search through COBS index located in BacQuerya storage and return search results and metadata to frontend"""
     if not request.json:
         return "not a json post"
     if request.json:
@@ -62,6 +65,7 @@ def postSeqResult():
 @app.route('/paper', methods=['POST'])
 @cross_origin()
 def paperSearch():
+    """Post query to biopython entrez for pubmed search and post results to frontend"""
     if not request.json:
         return "not a json post"
     if request.json:
@@ -78,9 +82,10 @@ def paperSearch():
         sys.stderr.write("\nPosting results to frontend\n")
         return jsonify({"result": searchResult})
 
-@app.route('/bulkSequences', methods=['POST'])
+@app.route('/bulkdownloads', methods=['POST'])
 @cross_origin()
 def bulkDownload():
+    """Recieve list of sequenceURLs and download sequences and compress. Serve compresed file with dynamic download link"""
     if not request.json:
         return "not a json post"
     if request.json:
@@ -88,13 +93,45 @@ def bulkDownload():
         n_cpu = 2
         if not os.path.exists(output_dir):
             os.mkdir(output_dir)
+        # currently hard coded and overwritten, will later change to tempdir that is removed after 24 hours
+        temp_dir = "genomic_sequences/requested_files"
+        raw_temp_dir = "genomic_sequences/requested_files/raw_files"
+        #temp_dir = tempfile.mkdtemp(dir=output_dir)
+        #raw_temp_dir = tempfile.mkdtemp(dir=temp_dir)
+        if not os.path.exists(temp_dir):
+            os.mkdir(temp_dir)
+        if not os.path.exists(raw_temp_dir):
+            os.mkdir(raw_temp_dir)
         urlDict = request.json
         urlList = urlDict["sequenceURLs"]
-        downloadURL = getDownloadLink(urlList, output_dir, n_cpu)
+        tarFilePath = getDownloadLink(urlList, temp_dir, raw_temp_dir, n_cpu)
+        s = Serializer(app.config['SECRET_KEY'], expires_in=60*10) # temporary URL 60 secs by 1 min
+        token = s.dumps({'file_path': tarFilePath}).decode("utf-8")
+        url_for('serve_file', token=token)
+        downloadURL = "https://bacquerya.azurewebsites.net:443/downloads/" + token
         if not (urlDict["email"] == "Enter email" or urlDict["email"].replace(" ", "") == ""):
             send_email(urlDict["email"], downloadURL)
-        shutil.rmtree(output_dir)
+        shutil.rmtree(raw_temp_dir)
         return jsonify({"downloadURL": downloadURL})
+
+@app.route("/downloads/<token>")
+def serve_file(token):
+    """Unserialise token, render appropriate html page and serve download link for compressed sequence folder"""
+    s = Serializer(app.config['SECRET_KEY'])
+    tarFilePath = None
+    try:
+        tarFilePath = s.loads(token)['file_path']
+    except:
+        return render_template('failed_download.html')
+    if not tarFilePath:
+        return render_template('failed_download.html')
+    else:
+        return render_template('successful_download.html', filepath=tarFilePath)
+
+@app.route('/download_link/<path:filepath>')
+def download_link(filepath):
+    """Serve compressed genomic sequence file"""
+    return send_file(os.path.join("../genomic_sequences", filepath), as_attachment=True)
 
 if __name__ == "__main__":
     app.run(debug=False,use_reloader=False)
