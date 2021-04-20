@@ -31,8 +31,8 @@ def getDownloadLink(urlList, output_dir, temp_dir, raw_temp_dir, n_cpu):
     sys.stderr.write("\nTarring sequence files\n")
     os.chdir("..")
     filePath = os.path.join(os.path.basename(temp_dir), "compressed_genomic_sequences.tar.gz")
-    subprocess.call(['tar', '-czf', filePath, os.path.basename(raw_temp_dir)])
     sys.stderr.write(os.path.abspath(filePath))
+    subprocess.call(['tar', '-czf', filePath, os.path.basename(raw_temp_dir)])
     os.chdir(current_dir)
     return filePath
 
