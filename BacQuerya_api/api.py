@@ -131,7 +131,8 @@ def serve_file(token):
 @app.route('/download_link/<path:filepath>')
 def download_link(filepath):
     """Serve compressed genomic sequence file"""
-    return send_file(os.path.join("..", gene_dir, "genomic_sequences", filepath), as_attachment=True)
+    os.chdir(os.path.join("..", gene_dir)
+    return send_file(os.path.join("genomic_sequences", filepath), as_attachment=True)
 
 if __name__ == "__main__":
     app.run(debug=False,use_reloader=False)
