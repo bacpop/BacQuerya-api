@@ -30,11 +30,10 @@ def getDownloadLink(urlList, output_dir, temp_dir, raw_temp_dir, n_cpu):
 
     sys.stderr.write("\nTarring sequence files\n")
     os.chdir("..")
-    filePath = os.path.join(os.path.basename(temp_dir), "compressed_genomic_sequences.tar.gz")
-    subprocess.call(['tar', '-czf', filePath, os.path.basename(raw_temp_dir)])
-    sys.stderr.write(os.path.abspath(filePath))
+    filePath = "compressed_genomic_sequences.tar.gz"
+    subprocess.call(['tar', '-czf', filePath, raw_temp_dir.split("/")[-1]])
     os.chdir(current_dir)
-    return filePath
+    return os.path.join(temp_dir.split("/")[-1], filePath)
 
 def send_email(target_email, downloadLink):
     """Automatically generates and send email containing the download link for sequences requested if the user email is specified"""
