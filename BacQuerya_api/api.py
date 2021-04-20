@@ -90,7 +90,7 @@ def bulkDownload():
         return "not a json post"
     if request.json:
         output_dir = "genomic_sequences"
-        n_cpu = 8
+        n_cpu = 2
         if not os.path.exists(output_dir):
             os.mkdir(output_dir)
         # currently hard coded and overwritten, will later change to tempdir that is removed after 24 hours
