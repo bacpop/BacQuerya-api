@@ -16,7 +16,7 @@ def download_sequence(url):
     url_label = os.path.basename(url)
     urllib.request.urlretrieve(url, url_label)
 
-def getDownloadLink(urlList, temp_dir, raw_temp_dir, n_cpu):
+def getDownloadLink(urlList, output_dir, temp_dir, raw_temp_dir, n_cpu):
     """Parallelises sequence downloading, tars the downloaded sequences and returns the relative path of the compressed directory"""
     current_dir = os.getcwd()
     os.chdir(raw_temp_dir)
@@ -31,7 +31,7 @@ def getDownloadLink(urlList, temp_dir, raw_temp_dir, n_cpu):
     sys.stderr.write("\nTarring sequence files\n")
     os.chdir(current_dir)
     filePath = os.path.join(os.path.basename(temp_dir), "compressed_genomic_sequences.tar.gz")
-    subprocess.call(['tar', '-czf', os.path.join("genomic_sequences", filePath), raw_temp_dir])
+    subprocess.call(['tar', '-czf', os.path.join(output_dir, filePath), raw_temp_dir])
     return filePath
 
 def send_email(target_email, downloadLink):
