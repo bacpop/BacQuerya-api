@@ -128,5 +128,6 @@ dmypy.json
 # Pyre type checker
 .pyre/
 
-# important files
+# important folders
 gene_test_files/
+genomic_sequences/

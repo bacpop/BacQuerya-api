@@ -15,8 +15,9 @@ def download_sequence(url):
     url_label = os.path.basename(url)
     urllib.request.urlretrieve(url, url_label)
 
-def getDownloadLink(urlList, output_dir, n_cpu):
-    os.chdir(output_dir)
+def getDownloadLink(urlList, temp_dir, raw_temp_dir, n_cpu):
+    current_dir = os.getcwd()
+    os.chdir(raw_temp_dir)
     sys.stderr.write("\nDownloading sequence files\n")
     # parallelise sequence download
     job_list = [
@@ -25,14 +26,15 @@ def getDownloadLink(urlList, output_dir, n_cpu):
     for job in tqdm(job_list):
         Parallel(n_jobs=n_cpu)(delayed(download_sequence)(url) for url in job)
 
-    sys.stderr.write("\Tarring sequence files\n")
-    os.chdir("..")
-    subprocess.call(['tar', '-czf', "compressed_genomic_sequences.tar.gz", output_dir])
-    return "Done downloading"
+    sys.stderr.write("\nTarring sequence files\n")
+    os.chdir(current_dir)
+    filePath = os.path.join(os.path.basename(temp_dir), "compressed_genomic_sequences.tar.gz")
+    subprocess.call(['tar', '-czf', os.path.join("genomic_sequences", filePath), raw_temp_dir])
+    return filePath
 
 def send_email(target_email, downloadLink):
     msg = MIMEMultipart()
-    message = "Hello,\nWe are emailing to let you know your sequences have successfully been retrieved! Your sequences are available from the following link:\n" + downloadLink + "\nKind regards,\nThe BacQuerya team"
+    message = "Hello,\n\nWe are emailing to let you know your sequences have successfully been retrieved and are available from the following link:\n\n" + downloadLink + "\n\n This link will remain live for 24 hours, after which time you will need to re-request your sequences.\n\nKind regards,\n\nThe BacQuerya team"
     msg['Subject'] = "Your recent BacQuerya sequence request"
     msg['From'] = SOURCE_ADDRESS
     msg['To'] = target_email
@@ -43,4 +45,3 @@ def send_email(target_email, downloadLink):
     s.login(SOURCE_ADDRESS, SOURCE_PASSWORD)
     s.send_message(msg)
     s.quit()
-    return
