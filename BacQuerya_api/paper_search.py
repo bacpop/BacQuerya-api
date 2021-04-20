@@ -10,7 +10,7 @@ from urllib.parse import quote
 def search_pubmed(searchTerm,
                   email,
                   number):
-    """Download the attribute for accessions of interest using Biopython Entrez"""
+    """Use Biopython Entrez to search for paper query in pubmed"""
     Entrez.email = email
     handle = Entrez.read(Entrez.esearch(db="pubmed", term=searchTerm, retmax = number))
     idList = handle["IdList"]

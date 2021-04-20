@@ -105,7 +105,7 @@ def bulkDownload():
         urlDict = request.json
         urlList = urlDict["sequenceURLs"]
         tarFilePath = getDownloadLink(urlList, temp_dir, raw_temp_dir, n_cpu)
-        s = Serializer(app.config['SECRET_KEY'], expires_in=60*10) # temporary URL 60 secs by 1 min
+        s = Serializer(app.config['SECRET_KEY'], expires_in=60*60*24) # temporary URL live for 60 secs by 60 min by 24 hours
         token = s.dumps({'file_path': tarFilePath}).decode("utf-8")
         url_for('serve_file', token=token)
         downloadURL = "https://bacquerya.azurewebsites.net:443/downloads/" + token
