@@ -1,4 +1,4 @@
-import cobs_index as cobs
+#import cobs_index as cobs
 from flask import Flask, request, jsonify, send_file, url_for, render_template
 from flask_cors import CORS, cross_origin
 from itsdangerous import TimedJSONWebSignatureSerializer as Serializer
@@ -15,7 +15,8 @@ from paper_search import search_pubmed
 from bulk_download import getDownloadLink, send_email
 
 # data locations
-gene_dir = '/home/bacquerya-usr/' + os.getenv('GENE_FILES')
+#gene_dir = '/home/bacquerya-usr/' + os.getenv('GENE_FILES')
+gene_dir = os.getenv('GENE_FILES')
 SECRET_KEY = os.environ.get('FLASK_SECRET_KEY')
 app = Flask(__name__, instance_relative_config=True)
 app.config.update(
@@ -131,9 +132,7 @@ def serve_file(token):
 @app.route('/download_link/<path:filepath>')
 def download_link(filepath):
     """Serve compressed genomic sequence file"""
-    os.chdir(os.path.join("..", gene_dir))
-    return send_file(os.path.join("genomic_sequences", filepath), as_attachment=True)
+    return send_file(os.path.join("..", gene_dir, filepath), as_attachment=True)
 
 if __name__ == "__main__":
     app.run(debug=False,use_reloader=False)
-
