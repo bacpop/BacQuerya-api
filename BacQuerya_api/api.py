@@ -15,8 +15,7 @@ from paper_search import search_pubmed
 from bulk_download import getDownloadLink, send_email
 
 # data locations
-#gene_dir = '/home/bacquerya-usr/' + os.getenv('GENE_FILES')
-gene_dir = os.getenv('GENE_FILES')
+gene_dir = '/home/bacquerya-usr/' + os.getenv('GENE_FILES')
 SECRET_KEY = os.environ.get('FLASK_SECRET_KEY')
 app = Flask(__name__, instance_relative_config=True)
 app.config.update(
