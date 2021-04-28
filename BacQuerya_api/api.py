@@ -1,4 +1,4 @@
-#import cobs_index as cobs
+import cobs_index as cobs
 from flask import Flask, request, jsonify, send_file, url_for, render_template
 from flask_cors import CORS, cross_origin
 from itsdangerous import TimedJSONWebSignatureSerializer as Serializer
@@ -133,6 +133,12 @@ def serve_file(token):
 def download_link(filepath):
     """Serve compressed genomic sequence file"""
     return send_file(os.path.join("..", gene_dir, filepath), as_attachment=True)
+
+@app.route('/alignement/<panarooName>', methods=['POST'])
+@cross_origin()
+def alignementDownload():
+    """Send MSA for requested gene"""
+    return send_file(os.path.join("..", gene_dir, "alignements", panarooName + ".fa"), as_attachment=True)
 
 if __name__ == "__main__":
     app.run(debug=False,use_reloader=False)
