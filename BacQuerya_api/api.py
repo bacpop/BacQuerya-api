@@ -134,11 +134,11 @@ def download_link(filepath):
     """Serve compressed genomic sequence file"""
     return send_file(os.path.join("..", gene_dir, filepath), as_attachment=True)
 
-@app.route('/alignement/<panarooName>', methods=['POST'])
+@app.route('/alignment/<panarooName>', methods=['POST'])
 @cross_origin()
 def alignementDownload():
     """Send MSA for requested gene"""
-    return send_file(os.path.join("..", gene_dir, "alignements", panarooName + ".fa"), as_attachment=True)
+    return send_file(os.path.join("..", gene_dir, "alignments", panarooName + ".fa"), as_attachment=True)
 
 if __name__ == "__main__":
     app.run(debug=False,use_reloader=False)
