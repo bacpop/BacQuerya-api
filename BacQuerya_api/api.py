@@ -13,6 +13,7 @@ from urllib.parse import unquote
 
 from paper_search import search_pubmed
 from bulk_download import getDownloadLink, send_email
+from index_query import geneQuery, specificGeneQuery, speciesQuery, isolateQuery, specificIsolateQuery
 
 # data locations
 gene_dir = '/home/bacquerya-usr/' + os.getenv('GENE_FILES')
@@ -25,6 +26,40 @@ app.config.update(
 )
 
 CORS(app, expose_headers='Authorization')
+
+@app.route('/geneQuery', methods=['POST'])
+@cross_origin()
+def queryGeneIndex():
+    """Query search term in gene elastic index"""
+    if not request.json:
+        return "not a json post"
+    if request.json:
+        searchDict = request.json
+        searchTerm = searchDict["searchTerm"]
+        searchType = searchDict["searchType"]
+        if searchType == "gene":
+            searchResult = geneQuery(searchTerm)
+        elif searchType == "consistentNameList":
+            searchResult = specificGeneQuery(searchTerm)
+        return jsonify({"searchResult": searchResult})
+
+@app.route('/isolateQuery', methods=['POST'])
+@cross_origin()
+def queryIsolateIndex():
+    """Query search term in isolate elastic index"""
+    if not request.json:
+        return "not a json post"
+    if request.json:
+        searchDict = request.json
+        searchTerm = searchDict["searchTerm"]
+        searchType = searchDict["searchType"]
+        if searchType == "species":
+            searchResult = speciesQuery(searchTerm)
+        elif searchType == "isolate":
+            searchResult = isolateQuery(searchTerm)
+        elif searchType == "biosampleList":
+            searchResult = specificIsolateQuery(searchTerm)
+        return jsonify({"searchResult": searchResult})
 
 @app.route('/sequence', methods=['POST'])
 @cross_origin()
