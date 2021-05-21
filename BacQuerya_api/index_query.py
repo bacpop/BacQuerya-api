@@ -1,16 +1,18 @@
 from elasticsearch import Elasticsearch
 import os
 
+from secrets import ELASTIC_API_URL, ELASTIC_GENE_NAME, ELASTIC_ISOLATE_NAME, ELASTIC_ISOLATE_API_ID, ELASTIC_ISOLATE_API_KEY, ELASTIC_GENE_API_ID, ELASTIC_GEME_API_KEY
+
 def geneQuery(searchTerm):
     """Search for gene in elastic gene index"""
     searchURL = os.environ.get("ELASTIC_ENDPOINT")
     apiID = os.environ.get("GENE_INDEX_API_ID")
     apiKEY = os.environ.get("GENE_INDEX_API_KEY")
     indexName = os.environ.get("GENE_INDEX_NAME")
-    searchURL = "https://i-o-optimized-deployment-de79a3.es.us-west1.gcp.cloud.es.io:9243"
-    apiID = "aWKfX3kB_PwVrjMbInpH"
-    apiKEY = "zzi4MxIRTXSKPsfJ4f6ngw"
-    indexName = "gene_index_3"
+    searchURL = ELASTIC_API_URL
+    apiID = ELASTIC_GENE_API_ID
+    apiKEY = ELASTIC_GEME_API_KEY
+    indexName = ELASTIC_GENE_NAME
     fetchData = {"size": 1000,
                 "query" : {
                     "multi_match" : {
@@ -37,11 +39,10 @@ def specificGeneQuery(geneList):
     apiID = os.environ.get("GENE_INDEX_API_ID")
     apiKEY = os.environ.get("GENE_INDEX_API_KEY")
     indexName = os.environ.get("GENE_INDEX_NAME")
-    searchURL = "https://i-o-optimized-deployment-de79a3.es.us-west1.gcp.cloud.es.io:9243"
-    apiID = "aWKfX3kB_PwVrjMbInpH"
-    apiKEY = "zzi4MxIRTXSKPsfJ4f6ngw"
-    indexName = "gene_index_3"
-
+    searchURL = ELASTIC_API_URL
+    apiID = ELASTIC_GENE_API_ID
+    apiKEY = ELASTIC_GEME_API_KEY
+    indexName = ELASTIC_GENE_NAME
     metadata_list = []
     client = Elasticsearch([searchURL],
                            api_key=(apiID, apiKEY))
@@ -67,10 +68,10 @@ def speciesQuery(searchTerm):
     apiID = os.environ.get("ISOLATE_INDEX_API_ID")
     apiKEY = os.environ.get("ISOLATE_INDEX_API_KEY")
     indexName = os.environ.get("ISOLATE_INDEX_NAME")
-    searchURL = "https://i-o-optimized-deployment-de79a3.es.us-west1.gcp.cloud.es.io:9243"
-    apiID = "AETMYHkBmrNwpm-_Sox-"
-    apiKEY = "n10Zad20TVuWHY-Mc5_kyw"
-    indexName = "isolate_index_3"
+    searchURL = ELASTIC_API_URL
+    apiID = ELASTIC_ISOLATE_API_ID
+    apiKEY = ELASTIC_ISOLATE_API_KEY
+    indexName = ELASTIC_ISOLATE_NAME
     fetchData = {"size": 1000,
                 "query" : {
                     "match" : {
@@ -90,26 +91,26 @@ def isolateQuery(searchTerm):
     apiID = os.environ.get("ISOLATE_INDEX_API_ID")
     apiKEY = os.environ.get("ISOLATE_INDEX_API_KEY")
     indexName = os.environ.get("ISOLATE_INDEX_NAME")
-    searchURL = "https://i-o-optimized-deployment-de79a3.es.us-west1.gcp.cloud.es.io:9243"
-    apiID = "AETMYHkBmrNwpm-_Sox-"
-    apiKEY = "n10Zad20TVuWHY-Mc5_kyw"
-    indexName = "isolate_index_3"
+    searchURL = ELASTIC_API_URL
+    apiID = ELASTIC_ISOLATE_API_ID
+    apiKEY = ELASTIC_ISOLATE_API_KEY
+    indexName = ELASTIC_ISOLATE_NAME
     fetchData = {"size": 1000,
                     "query" : {
-                    "match" : {
-                        "query" : searchTerm,
-                        "fields" : [
-                            "isolateName",
-                            "isolateNameUnderscore",
-                            "Assembly_name",
-                            "Infraspecific_name",
-                            "GenBank_assembly_accession",
-                            "RefSeq_assembly_and_GenBank_assemblies_identical",
-                            "BioSample",
-                            "Organism_name"
-                        ],
-                        "operator": "or",
-                        "fuzziness": "AUTO",
+                        "multi_match" : {
+                            "query" : searchTerm,
+                            "fields" : [
+                                "isolateName",
+                                "isolateNameUnderscore",
+                                "Assembly_name",
+                                "Infraspecific_name",
+                                "GenBank_assembly_accession",
+                                "RefSeq_assembly_and_GenBank_assemblies_identical",
+                                "BioSample",
+                                "Organism_name"
+                            ],
+                            "operator": "or",
+                            "fuzziness": "AUTO",
                     },
                 }
             }
@@ -125,10 +126,10 @@ def specificIsolateQuery(accessionList):
     apiID = os.environ.get("ISOLATE_INDEX_API_ID")
     apiKEY = os.environ.get("ISOLATE_INDEX_API_KEY")
     indexName = os.environ.get("ISOLATE_INDEX_NAME")
-    searchURL = "https://i-o-optimized-deployment-de79a3.es.us-west1.gcp.cloud.es.io:9243"
-    apiID = "AETMYHkBmrNwpm-_Sox-"
-    apiKEY = "n10Zad20TVuWHY-Mc5_kyw"
-    indexName = "isolate_index_3"
+    searchURL = ELASTIC_API_URL
+    apiID = ELASTIC_ISOLATE_API_ID
+    apiKEY = ELASTIC_ISOLATE_API_KEY
+    indexName = ELASTIC_ISOLATE_NAME
     metadata_list = []
     client = Elasticsearch([searchURL],
                            api_key=(apiID, apiKEY))

@@ -120,7 +120,7 @@ def paperSearch():
 @app.route('/bulkdownloads', methods=['POST'])
 @cross_origin()
 def bulkDownload():
-    """Recieve list of sequenceURLs and download sequences and compress. Serve compresed file with dynamic download link"""
+    """Receive list of sequenceURLs and download sequences and compress. Serve compresed file with dynamic download link"""
     if not request.json:
         return "not a json post"
     if request.json:

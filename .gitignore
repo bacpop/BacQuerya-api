@@ -131,3 +131,6 @@ dmypy.json
 # important folders
 gene_test_files/
 genomic_sequences/
+
+# secrets
+BacQuerya_api/secrets.py
