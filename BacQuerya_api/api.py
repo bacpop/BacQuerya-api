@@ -1,4 +1,4 @@
-import cobs_index as cobs
+#import cobs_index as cobs
 from flask import Flask, request, jsonify, send_file, url_for, render_template
 from flask_cors import CORS, cross_origin
 from itsdangerous import TimedJSONWebSignatureSerializer as Serializer
@@ -155,6 +155,7 @@ def bulkDownload():
             return send_file(os.path.join("..", gene_dir, temp_dir, "sequenceURLs.txt"), as_attachment=True)
 
 @app.route("/downloads/<token>")
+@cross_origin()
 def serve_file(token):
     """Unserialise token, render appropriate html page and serve download link for compressed sequence folder"""
     s = Serializer(app.config['SECRET_KEY'])
@@ -169,6 +170,7 @@ def serve_file(token):
         return render_template('successful_download.html', filepath=tarFilePath)
 
 @app.route('/download_link/<path:filepath>')
+@cross_origin()
 def download_link(filepath):
     """Serve compressed genomic sequence file"""
     return send_file(os.path.join("..", gene_dir, filepath), as_attachment=True)
