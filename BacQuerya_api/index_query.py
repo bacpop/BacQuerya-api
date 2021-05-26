@@ -1,18 +1,14 @@
 from elasticsearch import Elasticsearch
 import os
 
-from secrets import ELASTIC_API_URL, ELASTIC_GENE_NAME, ELASTIC_ISOLATE_NAME, ELASTIC_ISOLATE_API_ID, ELASTIC_ISOLATE_API_KEY, ELASTIC_GENE_API_ID, ELASTIC_GEME_API_KEY
+#from secrets import ELASTIC_API_URL, ELASTIC_GENE_NAME, ELASTIC_ISOLATE_NAME, ELASTIC_ISOLATE_API_ID, ELASTIC_ISOLATE_API_KEY, ELASTIC_GENE_API_ID, ELASTIC_GEME_API_KEY
 
 def geneQuery(searchTerm):
     """Search for gene in elastic gene index"""
-    searchURL = os.environ.get("ELASTIC_ENDPOINT")
-    apiID = os.environ.get("GENE_INDEX_API_ID")
-    apiKEY = os.environ.get("GENE_INDEX_API_KEY")
-    indexName = os.environ.get("GENE_INDEX_NAME")
-    searchURL = ELASTIC_API_URL
-    apiID = ELASTIC_GENE_API_ID
-    apiKEY = ELASTIC_GEME_API_KEY
-    indexName = ELASTIC_GENE_NAME
+    searchURL = os.environ.get("ELASTIC_API_URL")
+    apiID = os.environ.get("ELASTIC_GENE_API_ID")
+    apiKEY = os.environ.get("ELASTIC_GENE_API_KEY")
+    indexName = os.environ.get("ELASTIC_GENE_NAME")
     fetchData = {"size": 10000,
                 "query" : {
                     "multi_match" : {
@@ -35,14 +31,10 @@ def geneQuery(searchTerm):
 
 def specificGeneQuery(geneList):
     """Search for list of genes in elastic gene index"""
-    earchURL = os.environ.get("ELASTIC_ENDPOINT")
-    apiID = os.environ.get("GENE_INDEX_API_ID")
-    apiKEY = os.environ.get("GENE_INDEX_API_KEY")
-    indexName = os.environ.get("GENE_INDEX_NAME")
-    searchURL = ELASTIC_API_URL
-    apiID = ELASTIC_GENE_API_ID
-    apiKEY = ELASTIC_GEME_API_KEY
-    indexName = ELASTIC_GENE_NAME
+    searchURL = os.environ.get("ELASTIC_API_URL")
+    apiID = os.environ.get("ELASTIC_GENE_API_ID")
+    apiKEY = os.environ.get("ELASTIC_GENE_API_KEY")
+    indexName = os.environ.get("ELASTIC_GENE_NAME")
     metadata_list = []
     client = Elasticsearch([searchURL],
                            api_key=(apiID, apiKEY))
@@ -64,14 +56,10 @@ def specificGeneQuery(geneList):
 
 def speciesQuery(searchTerm):
     """Get all species results in elastic isolate index"""
-    searchURL = os.environ.get("ELASTIC_ENDPOINT")
-    apiID = os.environ.get("ISOLATE_INDEX_API_ID")
-    apiKEY = os.environ.get("ISOLATE_INDEX_API_KEY")
-    indexName = os.environ.get("ISOLATE_INDEX_NAME")
-    searchURL = ELASTIC_API_URL
-    apiID = ELASTIC_ISOLATE_API_ID
-    apiKEY = ELASTIC_ISOLATE_API_KEY
-    indexName = ELASTIC_ISOLATE_NAME
+    searchURL = os.environ.get("ELASTIC_API_URL")
+    apiID = os.environ.get("ELASTIC_ISOLATE_API_ID")
+    apiKEY = os.environ.get("ELASTIC_ISOLATE_API_KEY")
+    indexName = os.environ.get("ELASTIC_ISOLATE_NAME")
     fetchData = {"size": 10000,
                 "query" : {
                     "match" : {
@@ -87,14 +75,10 @@ def speciesQuery(searchTerm):
 
 def isolateQuery(searchTerm):
     """Search through isolates in elastic isolate index"""
-    searchURL = os.environ.get("ELASTIC_ENDPOINT")
-    apiID = os.environ.get("ISOLATE_INDEX_API_ID")
-    apiKEY = os.environ.get("ISOLATE_INDEX_API_KEY")
-    indexName = os.environ.get("ISOLATE_INDEX_NAME")
-    searchURL = ELASTIC_API_URL
-    apiID = ELASTIC_ISOLATE_API_ID
-    apiKEY = ELASTIC_ISOLATE_API_KEY
-    indexName = ELASTIC_ISOLATE_NAME
+    searchURL = os.environ.get("ELASTIC_API_URL")
+    apiID = os.environ.get("ELASTIC_ISOLATE_API_ID")
+    apiKEY = os.environ.get("ELASTIC_ISOLATE_API_KEY")
+    indexName = os.environ.get("ELASTIC_ISOLATE_NAME")
     fetchData = {"size": 10000,
                     "query" : {
                         "multi_match" : {
@@ -124,14 +108,10 @@ def isolateQuery(searchTerm):
 
 def specificIsolateQuery(accessionList):
     """Iterate through list of isolate biosample accessions and get metadata"""
-    searchURL = os.environ.get("ELASTIC_ENDPOINT")
-    apiID = os.environ.get("ISOLATE_INDEX_API_ID")
-    apiKEY = os.environ.get("ISOLATE_INDEX_API_KEY")
-    indexName = os.environ.get("ISOLATE_INDEX_NAME")
-    searchURL = ELASTIC_API_URL
-    apiID = ELASTIC_ISOLATE_API_ID
-    apiKEY = ELASTIC_ISOLATE_API_KEY
-    indexName = ELASTIC_ISOLATE_NAME
+    searchURL = os.environ.get("ELASTIC_API_URL")
+    apiID = os.environ.get("ELASTIC_ISOLATE_API_ID")
+    apiKEY = os.environ.get("ELASTIC_ISOLATE_API_KEY")
+    indexName = os.environ.get("ELASTIC_ISOLATE_NAME")
     metadata_list = []
     client = Elasticsearch([searchURL],
                            api_key=(apiID, apiKEY))
