@@ -13,6 +13,7 @@ from urllib.parse import unquote
 
 from paper_search import search_pubmed
 from bulk_download import getDownloadLink, send_email
+from index_query import geneQuery, specificGeneQuery, speciesQuery, isolateQuery, specificIsolateQuery
 
 # data locations
 gene_dir = '/home/bacquerya-usr/' + os.getenv('GENE_FILES')
@@ -25,6 +26,40 @@ app.config.update(
 )
 
 CORS(app, expose_headers='Authorization')
+
+@app.route('/geneQuery', methods=['POST'])
+@cross_origin()
+def queryGeneIndex():
+    """Query search term in gene elastic index"""
+    if not request.json:
+        return "not a json post"
+    if request.json:
+        searchDict = request.json
+        searchTerm = searchDict["searchTerm"]
+        searchType = searchDict["searchType"]
+        if searchType == "gene":
+            searchResult = geneQuery(searchTerm)
+        elif searchType == "consistentNameList":
+            searchResult = specificGeneQuery(searchTerm)
+        return jsonify({"searchResult": searchResult})
+
+@app.route('/isolateQuery', methods=['POST'])
+@cross_origin()
+def queryIsolateIndex():
+    """Query search term in isolate elastic index"""
+    if not request.json:
+        return "not a json post"
+    if request.json:
+        searchDict = request.json
+        searchTerm = searchDict["searchTerm"]
+        searchType = searchDict["searchType"]
+        if searchType == "species":
+            searchResult = speciesQuery(searchTerm)
+        elif searchType == "isolate":
+            searchResult = isolateQuery(searchTerm)
+        elif searchType == "biosampleList":
+            searchResult = specificIsolateQuery(searchTerm)
+        return jsonify({"searchResult": searchResult})
 
 @app.route('/sequence', methods=['POST'])
 @cross_origin()
@@ -85,7 +120,7 @@ def paperSearch():
 @app.route('/bulkdownloads', methods=['POST'])
 @cross_origin()
 def bulkDownload():
-    """Recieve list of sequenceURLs and download sequences and compress. Serve compresed file with dynamic download link"""
+    """Receive list of sequenceURLs and download sequences and compress. Serve compresed file with dynamic download link"""
     if not request.json:
         return "not a json post"
     if request.json:
@@ -104,15 +139,20 @@ def bulkDownload():
             os.mkdir(raw_temp_dir)
         urlDict = request.json
         urlList = urlDict["sequenceURLs"]
-        tarFilePath = getDownloadLink(urlList, output_dir, temp_dir, raw_temp_dir, n_cpu)
-        s = Serializer(app.config['SECRET_KEY'], expires_in=60*60*24) # temporary URL live for 60 secs by 60 min by 24 hours
-        token = s.dumps({'file_path': tarFilePath}).decode("utf-8")
-        url_for('serve_file', token=token)
-        downloadURL = "https://bacquerya.azurewebsites.net:443/downloads/" + token
-        if not (urlDict["email"] == "Enter email" or urlDict["email"].replace(" ", "") == ""):
-            send_email(urlDict["email"], downloadURL)
-        shutil.rmtree(raw_temp_dir)
-        return jsonify({"downloadURL": downloadURL})
+        if len(urlList) <= 100:
+            tarFilePath = getDownloadLink(urlList, output_dir, temp_dir, raw_temp_dir, n_cpu)
+            s = Serializer(app.config['SECRET_KEY'], expires_in=60*60*24) # temporary URL live for 60 secs by 60 min by 24 hours
+            token = s.dumps({'file_path': tarFilePath}).decode("utf-8")
+            url_for('serve_file', token=token)
+            downloadURL = "https://bacquerya.azurewebsites.net:443/downloads/" + token
+            if not (urlDict["email"] == "Enter email" or urlDict["email"].replace(" ", "") == ""):
+                send_email(urlDict["email"], downloadURL)
+            shutil.rmtree(raw_temp_dir)
+            return jsonify({"downloadURL": downloadURL})
+        else:
+            with open(os.path.join("..", gene_dir, temp_dir, "sequenceURLs.txt"), "w") as outSequences:
+                outSequences.write("\n".join(urlList))
+            return send_file(os.path.join("..", gene_dir, temp_dir, "sequenceURLs.txt"), as_attachment=True)
 
 @app.route("/downloads/<token>")
 def serve_file(token):
@@ -133,11 +173,11 @@ def download_link(filepath):
     """Serve compressed genomic sequence file"""
     return send_file(os.path.join("..", gene_dir, filepath), as_attachment=True)
 
-@app.route('/alignement/<panarooName>', methods=['POST'])
+@app.route('/alignment/<panarooName>', methods=['POST'])
 @cross_origin()
 def alignementDownload():
     """Send MSA for requested gene"""
-    return send_file(os.path.join("..", gene_dir, "alignements", panarooName + ".fa"), as_attachment=True)
+    return send_file(os.path.join("..", gene_dir, "alignments", panarooName + ".fa"), as_attachment=True)
 
 if __name__ == "__main__":
     app.run(debug=False,use_reloader=False)
