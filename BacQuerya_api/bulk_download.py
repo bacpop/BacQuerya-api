@@ -8,8 +8,8 @@ import sys
 from tqdm import tqdm
 import urllib.request
 
-SOURCE_ADDRESS = os.getenv('SOURCE_ADDRESS')
-SOURCE_PASSWORD = os.getenv('SOURCE_PASSWORD')
+SOURCE_ADDRESS = os.environ.get('SOURCE_ADDRESS')
+SOURCE_PASSWORD = os.environ.get('SOURCE_PASSWORD')
 
 def download_sequence(url):
     """Download genomic sequence of interest using URL"""
