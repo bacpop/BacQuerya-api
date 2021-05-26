@@ -56,7 +56,8 @@ def queryIsolateIndex():
         if searchType == "species":
             searchResult = speciesQuery(searchTerm)
         elif searchType == "isolate":
-            searchResult = isolateQuery(searchTerm)
+            searchFilters = searchDict["searchFilters"]
+            searchResult = isolateQuery(searchTerm, searchFilters)
         elif searchType == "biosampleList":
             searchResult = specificIsolateQuery(searchTerm)
         return jsonify({"searchResult": searchResult})
