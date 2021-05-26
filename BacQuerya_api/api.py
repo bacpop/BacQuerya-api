@@ -91,9 +91,9 @@ def postSeqResult():
             for k, v in genePairs.items():
                 if k == int(index):
                     geneName = v["consistentNames"]
-            match_proportion = round(match_count*100/((query_length-kmer_length)+1), 2)
-            metrics = {"geneName": geneName, "numberMatching": match_proportion}
-            result_metrics.append(metrics)
+                    match_proportion = round(match_count*100/((query_length-kmer_length)+1), 2)
+                    metrics = {"geneName": geneName, "numberMatching": match_proportion}
+                    result_metrics.append(metrics)
         sys.stderr.write("\nPosting results to frontend\n")
         response = {"resultMetrics" : result_metrics}
     return jsonify(response)
