@@ -11,7 +11,7 @@ from tqdm import tqdm
 from types import SimpleNamespace
 from urllib.parse import unquote
 
-from paper_search import search_pubmed
+from study_search import search_pubmed
 from bulk_download import getDownloadLink, send_email
 from index_query import geneQuery, specificGeneQuery, speciesQuery, isolateQuery, specificIsolateQuery
 
@@ -97,9 +97,9 @@ def postSeqResult():
         response = {"resultMetrics" : result_metrics}
     return jsonify(response)
 
-@app.route('/paper', methods=['POST'])
+@app.route('/study', methods=['POST'])
 @cross_origin()
-def paperSearch():
+def studySearch():
     """Post query to biopython entrez for pubmed search and post results to frontend"""
     if not request.json:
         return "not a json post"
