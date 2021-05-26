@@ -9,7 +9,7 @@ def geneQuery(searchTerm):
     apiID = os.environ.get("ELASTIC_GENE_API_ID")
     apiKEY = os.environ.get("ELASTIC_GENE_API_KEY")
     indexName = os.environ.get("ELASTIC_GENE_NAME")
-    fetchData = {"size": 10000,
+    fetchData = {"size": 1000,
                 "query" : {
                     "multi_match" : {
                         "query" : searchTerm,
@@ -40,7 +40,7 @@ def specificGeneQuery(geneList):
     client = Elasticsearch([searchURL],
                            api_key=(apiID, apiKEY))
     for geneName in geneList:
-        fetchData = {"size": 10000,
+        fetchData = {"size": 1000,
                     "query" : {
                         "match": {
                             "consistentNames": geneName
@@ -62,7 +62,7 @@ def speciesQuery(searchTerm):
     apiID = os.environ.get("ELASTIC_ISOLATE_API_ID")
     apiKEY = os.environ.get("ELASTIC_ISOLATE_API_KEY")
     indexName = os.environ.get("ELASTIC_ISOLATE_NAME")
-    fetchData = {"size": 10000,
+    fetchData = {"size": 1000,
                 "query" : {
                     "match" : {
                         "Organism_name" : searchTerm
@@ -82,7 +82,7 @@ def isolateQuery(searchTerm):
     apiID = os.environ.get("ELASTIC_ISOLATE_API_ID")
     apiKEY = os.environ.get("ELASTIC_ISOLATE_API_KEY")
     indexName = os.environ.get("ELASTIC_ISOLATE_NAME")
-    fetchData = {"size": 10000,
+    fetchData = {"size": 1000,
                     "query" : {
                         "multi_match" : {
                             "query" : searchTerm,
@@ -120,7 +120,7 @@ def specificIsolateQuery(accessionList):
     client = Elasticsearch([searchURL],
                            api_key=(apiID, apiKEY))
     for accession in accessionList:
-        fetchData = {"size": 10000,
+        fetchData = {"size": 1000,
                     "query": {
                         "bool": {
                             "must": [{
