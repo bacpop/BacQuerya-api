@@ -1,4 +1,4 @@
-#import cobs_index as cobs
+import cobs_index as cobs
 from flask import Flask, request, jsonify, send_file, url_for, render_template
 from flask_cors import CORS, cross_origin
 from itsdangerous import TimedJSONWebSignatureSerializer as Serializer

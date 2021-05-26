@@ -26,7 +26,8 @@ def geneQuery(searchTerm):
     client = Elasticsearch([searchURL],
                            api_key=(apiID, apiKEY))
     geneResult = client.search(index = indexName,
-                               body = fetchData)
+                               body = fetchData,
+                               request_timeout = 30)
     return geneResult["hits"]["hits"]
 
 def specificGeneQuery(geneList):
@@ -47,7 +48,8 @@ def specificGeneQuery(geneList):
                         }
                     }
         geneMetadata = client.search(index = indexName,
-                                     body = fetchData)
+                                     body = fetchData,
+                                     request_timeout = 30)
         if not len(geneMetadata["hits"]["hits"]) == 0:
             metadata_list.append(geneMetadata["hits"]["hits"][0])
         else:
@@ -70,7 +72,8 @@ def speciesQuery(searchTerm):
     client = Elasticsearch([searchURL],
                            api_key=(apiID, apiKEY))
     speciesResult = client.search(index = indexName,
-                                  body = fetchData)
+                                  body = fetchData,
+                                  request_timeout = 30)
     return speciesResult["hits"]["hits"]
 
 def isolateQuery(searchTerm):
@@ -103,7 +106,8 @@ def isolateQuery(searchTerm):
     client = Elasticsearch([searchURL],
                            api_key=(apiID, apiKEY))
     isolateResult = client.search(index = indexName,
-                                  body = fetchData)
+                                  body = fetchData,
+                                  request_timeout = 30)
     return isolateResult["hits"]["hits"]
 
 def specificIsolateQuery(accessionList):
@@ -128,7 +132,8 @@ def specificIsolateQuery(accessionList):
                 }
                 }
         isolateMetadata = client.search(index = indexName,
-                                        body = fetchData)
+                                        body = fetchData,
+                                        request_timeout = 30)
         if not len(isolateMetadata["hits"]["hits"]) == 0:
             metadata_list.append(isolateMetadata["hits"]["hits"][0])
         else:
