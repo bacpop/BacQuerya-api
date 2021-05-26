@@ -13,7 +13,7 @@ def geneQuery(searchTerm):
     apiID = ELASTIC_GENE_API_ID
     apiKEY = ELASTIC_GEME_API_KEY
     indexName = ELASTIC_GENE_NAME
-    fetchData = {"size": 1000,
+    fetchData = {"size": 10000,
                 "query" : {
                     "multi_match" : {
                         "query" : searchTerm,
@@ -47,7 +47,7 @@ def specificGeneQuery(geneList):
     client = Elasticsearch([searchURL],
                            api_key=(apiID, apiKEY))
     for geneName in geneList:
-        fetchData = {"size": 1000,
+        fetchData = {"size": 10000,
                     "query" : {
                         "match": {
                             "consistentNames": geneName
@@ -72,7 +72,7 @@ def speciesQuery(searchTerm):
     apiID = ELASTIC_ISOLATE_API_ID
     apiKEY = ELASTIC_ISOLATE_API_KEY
     indexName = ELASTIC_ISOLATE_NAME
-    fetchData = {"size": 1000,
+    fetchData = {"size": 10000,
                 "query" : {
                     "match" : {
                         "Organism_name" : searchTerm
@@ -95,7 +95,7 @@ def isolateQuery(searchTerm):
     apiID = ELASTIC_ISOLATE_API_ID
     apiKEY = ELASTIC_ISOLATE_API_KEY
     indexName = ELASTIC_ISOLATE_NAME
-    fetchData = {"size": 1000,
+    fetchData = {"size": 10000,
                     "query" : {
                         "multi_match" : {
                             "query" : searchTerm,
@@ -107,7 +107,9 @@ def isolateQuery(searchTerm):
                                 "GenBank_assembly_accession",
                                 "RefSeq_assembly_and_GenBank_assemblies_identical",
                                 "BioSample",
-                                "Organism_name"
+                                "Organism_name",
+                                "In_Silico_Serotype",
+                                "Country"
                             ],
                             "operator": "or",
                             "fuzziness": "AUTO",
@@ -134,7 +136,7 @@ def specificIsolateQuery(accessionList):
     client = Elasticsearch([searchURL],
                            api_key=(apiID, apiKEY))
     for accession in accessionList:
-        fetchData = {"size": 1000,
+        fetchData = {"size": 10000,
                     "query": {
                         "bool": {
                             "must": [{
