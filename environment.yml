@@ -16,3 +16,4 @@ dependencies:
   - cobs
   - joblib
   - itsdangerous
+  - elasticsearch
