@@ -140,8 +140,13 @@ def bulkDownload():
         if not os.path.exists(raw_temp_dir):
             os.mkdir(raw_temp_dir)
         urlDict = request.json
-        urlList = urlDict["sequenceURLs"]
-        urlList = [url for url in urlList]
+        urls = urlDict["sequenceURLs"]
+        urlList = []
+        for url in urls:
+            if isinstance(url, list):
+                urlList += url
+            else:
+                urlList.append(url)
         if len(urlList) <= 100:
             tarFilePath = getDownloadLink(urlList, output_dir, temp_dir, raw_temp_dir, n_cpu)
         else:
