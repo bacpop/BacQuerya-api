@@ -79,14 +79,21 @@ def postSeqResult():
         # load metadata for identified sequences
         query_length = len(query_sequence)
         kmer_length = int(os.path.basename(index_name).split("_")[0])
-        result_metrics = []
         sys.stderr.write("\nExtracting metadata for COBS result\n")
+        # return only unique gene names and the highest match proportion for duplicate gene names in search results
+        no_duplicates = {}
         for res in tqdm(result):
             match_count = int(res.score)
-            document_name = res.doc_name.split("_")[0]
-            geneName = document_name
+            geneName = res.doc_name.split("_v")[0]
             match_proportion = round(match_count*100/((query_length-kmer_length)+1), 2)
-            metrics = {"geneName": geneName, "numberMatching": match_proportion}
+            if not geneName in no_duplicates:
+                no_duplicates[geneName] = match_proportion
+            else:
+                if no_duplicates[geneName] < match_proportion:
+                    no_duplicates[geneName] = match_proportion
+        result_metrics = []
+        for key, value in no_duplicates.items():
+            metrics = {"geneName": key, "numberMatching": value}
             result_metrics.append(metrics)
         sys.stderr.write("\nPosting results to frontend\n")
         response = {"resultMetrics" : result_metrics}
