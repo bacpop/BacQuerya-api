@@ -101,7 +101,6 @@ def getFilters(searchFilters):
             filterList.append({"range": {"Year": {"lte": int(years[1])}}})
         if not (years[0] == "" or years[0] == "Start") and not (years[1] == "" or years[1] == "End"):
             filterList.append({"range": {"Year": {"gte": int(years[0]), "lte": int(years[1])}}})
-    print(filterList)
     return filterList
 
 def isolateQuery(searchTerm, searchFilters):

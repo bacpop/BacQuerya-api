@@ -17,6 +17,7 @@ from index_query import geneQuery, specificGeneQuery, speciesQuery, isolateQuery
 
 # data locations
 gene_dir = '/home/bacquerya-usr/' + os.getenv('GENE_FILES')
+#gene_dir = "gene_test_files"
 SECRET_KEY = os.environ.get('FLASK_SECRET_KEY')
 app = Flask(__name__, instance_relative_config=True)
 app.config.update(
@@ -141,22 +142,21 @@ def bulkDownload():
             os.mkdir(raw_temp_dir)
         urlDict = request.json
         urlList = urlDict["sequenceURLs"]
-        urlList = [url for sublist in urlList for url in sublist]
+        urlList = [url for url in urlList]
         if len(urlList) <= 100:
             tarFilePath = getDownloadLink(urlList, output_dir, temp_dir, raw_temp_dir, n_cpu)
-            s = Serializer(app.config['SECRET_KEY'], expires_in=60*60*24) # temporary URL live for 60 secs by 60 min by 24 hours
-            token = s.dumps({'file_path': tarFilePath}).decode("utf-8")
-            url_for('serve_file', token=token)
-            downloadURL = "https://bacquerya.azurewebsites.net:443/downloads/" + token
-            if not (urlDict["email"] == "Enter email" or urlDict["email"].replace(" ", "") == ""):
-                send_email(urlDict["email"], downloadURL)
-            shutil.rmtree(raw_temp_dir)
-            return jsonify({"downloadURL": downloadURL})
         else:
-            with open(os.path.join("..", temp_dir, "sequenceURLs.txt"), "w") as outSequences:
+            tarFilePath = os.path.join("genomic_sequences", "sequenceURLs.txt")
+            with open(os.path.join(output_dir, "sequenceURLs.txt"), "w") as outSequences:
                 outSequences.write("\n".join(urlList))
-            sys.stderr.write(outSequences)
-            return send_file(os.path.join("..", temp_dir, "sequenceURLs.txt"), as_attachment=True)
+        s = Serializer(app.config['SECRET_KEY'], expires_in=60*60*24) # temporary URL live for 60 secs by 60 min by 24 hours
+        token = s.dumps({'file_path': tarFilePath}).decode("utf-8")
+        url_for('serve_file', token=token)
+        downloadURL = "https://bacquerya.azurewebsites.net:443/downloads/" + token
+        if not (urlDict["email"] == "Enter email" or urlDict["email"].replace(" ", "") == ""):
+            send_email(urlDict["email"], downloadURL)
+        shutil.rmtree(raw_temp_dir)
+        return jsonify({"downloadURL": downloadURL})
 
 @app.route("/downloads/<token>")
 @cross_origin()
