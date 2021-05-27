@@ -155,6 +155,7 @@ def bulkDownload():
         else:
             with open(os.path.join("..", temp_dir, "sequenceURLs.txt"), "w") as outSequences:
                 outSequences.write("\n".join(urlList))
+            sys.stderr.write(outSequences)
             return send_file(os.path.join("..", temp_dir, "sequenceURLs.txt"), as_attachment=True)
 
 @app.route("/downloads/<token>")
@@ -180,7 +181,7 @@ def download_link(filepath):
 
 @app.route('/alignment/<consistentName>', methods=['POST'])
 @cross_origin()
-def alignementDownload():
+def alignementDownload(consistentName):
     """Send MSA for requested gene"""
     return send_file(os.path.join("..", gene_dir, "alignments", consistentName + ".fa"), as_attachment=True)
 
