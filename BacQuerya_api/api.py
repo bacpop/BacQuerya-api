@@ -17,7 +17,6 @@ from index_query import geneQuery, specificGeneQuery, speciesQuery, isolateQuery
 
 # data locations
 gene_dir = '/home/bacquerya-usr/' + os.getenv('GENE_FILES')
-#gene_dir = "gene_test_files"
 SECRET_KEY = os.environ.get('FLASK_SECRET_KEY')
 app = Flask(__name__, instance_relative_config=True)
 app.config.update(
