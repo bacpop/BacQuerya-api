@@ -134,6 +134,7 @@ def bulkDownload():
             os.mkdir(raw_temp_dir)
         urlDict = request.json
         urlList = urlDict["sequenceURLs"]
+        urlList = [url for sublist in urlList for url in sublist]
         if len(urlList) <= 100:
             tarFilePath = getDownloadLink(urlList, output_dir, temp_dir, raw_temp_dir, n_cpu)
             s = Serializer(app.config['SECRET_KEY'], expires_in=60*60*24) # temporary URL live for 60 secs by 60 min by 24 hours
@@ -145,7 +146,6 @@ def bulkDownload():
             shutil.rmtree(raw_temp_dir)
             return jsonify({"downloadURL": downloadURL})
         else:
-            urlList = [url for sublist in urlList for url in sublist]
             with open(os.path.join("..", temp_dir, "sequenceURLs.txt"), "w") as outSequences:
                 outSequences.write("\n".join(urlList))
             return send_file(os.path.join("..", temp_dir, "sequenceURLs.txt"), as_attachment=True)
