@@ -16,7 +16,7 @@ from bulk_download import getDownloadLink, send_email
 from index_query import geneQuery, specificGeneQuery, speciesQuery, isolateQuery, specificIsolateQuery
 
 # data locations
-gene_dir = '/home/bacquerya-usr/' + os.getenv('GENE_FILES')
+gene_dir = '/home/bacquerya-usr/' + os.environ.get('GENE_FILES')
 SECRET_KEY = os.environ.get('FLASK_SECRET_KEY')
 app = Flask(__name__, instance_relative_config=True)
 app.config.update(
