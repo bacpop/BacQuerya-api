@@ -77,23 +77,17 @@ def postSeqResult():
         index = cobs.Search(index_name)
         result = index.search(query_sequence, threshold = 0.8)
         # load metadata for identified sequences
-        sys.stderr.write("\nLoading gene metadata\n")
-        with open(os.path.join(gene_dir, "panarooPairs.json")) as f:
-            geneJSON = f.read()
-        genePairs = json.loads(geneJSON)
         query_length = len(query_sequence)
         kmer_length = int(os.path.basename(index_name).split("_")[0])
         result_metrics = []
         sys.stderr.write("\nExtracting metadata for COBS result\n")
         for res in tqdm(result):
             match_count = int(res.score)
-            index = res.doc_name.split("_")[0]
-            for k, v in genePairs.items():
-                if k == int(index):
-                    geneName = v["consistentNames"]
-                    match_proportion = round(match_count*100/((query_length-kmer_length)+1), 2)
-                    metrics = {"geneName": geneName, "numberMatching": match_proportion}
-                    result_metrics.append(metrics)
+            document_name = res.doc_name.split("_")[0]
+            geneName = document_name
+            match_proportion = round(match_count*100/((query_length-kmer_length)+1), 2)
+            metrics = {"geneName": geneName, "numberMatching": match_proportion}
+            result_metrics.append(metrics)
         sys.stderr.write("\nPosting results to frontend\n")
         response = {"resultMetrics" : result_metrics}
     return jsonify(response)
@@ -176,11 +170,11 @@ def download_link(filepath):
     """Serve compressed genomic sequence file"""
     return send_file(os.path.join("..", gene_dir, filepath), as_attachment=True)
 
-@app.route('/alignment/<panarooName>', methods=['POST'])
+@app.route('/alignment/<consistentName>', methods=['POST'])
 @cross_origin()
 def alignementDownload():
     """Send MSA for requested gene"""
-    return send_file(os.path.join("..", gene_dir, "alignments", panarooName + ".fa"), as_attachment=True)
+    return send_file(os.path.join("..", gene_dir, "alignments", consistentName + ".fa"), as_attachment=True)
 
 if __name__ == "__main__":
     app.run(debug=False,use_reloader=False)
