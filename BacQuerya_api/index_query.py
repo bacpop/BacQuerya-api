@@ -62,7 +62,7 @@ def speciesQuery(searchTerm):
     apiID = os.environ.get("ELASTIC_ISOLATE_API_ID")
     apiKEY = os.environ.get("ELASTIC_ISOLATE_API_KEY")
     indexName = os.environ.get("ELASTIC_ISOLATE_NAME")
-    fetchData = {"size": 1000,
+    fetchData = {"size": 10000,
                 "query" : {
                     "match" : {
                         "Organism_name" : searchTerm
