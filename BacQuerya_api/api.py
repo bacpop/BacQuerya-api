@@ -1,4 +1,4 @@
-#import cobs_index as cobs
+import cobs_index as cobs
 from flask import Flask, request, jsonify, send_file, url_for, render_template
 from flask_cors import CORS, cross_origin
 from itsdangerous import TimedJSONWebSignatureSerializer as Serializer
@@ -16,8 +16,7 @@ from bulk_download import getDownloadLink, send_email
 from index_query import geneQuery, specificGeneQuery, speciesQuery, isolateQuery, specificIsolateQuery
 
 # data locations
-# '/home/bacquerya-usr/' + os.getenv('GENE_FILES')
-gene_dir = os.getenv('GENE_FILES')
+'/home/bacquerya-usr/' + os.getenv('GENE_FILES')
 SECRET_KEY = os.environ.get('FLASK_SECRET_KEY')
 app = Flask(__name__, instance_relative_config=True)
 app.config.update(
