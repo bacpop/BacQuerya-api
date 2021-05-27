@@ -1,4 +1,4 @@
-import cobs_index as cobs
+#import cobs_index as cobs
 from flask import Flask, request, jsonify, send_file, url_for, render_template
 from flask_cors import CORS, cross_origin
 from itsdangerous import TimedJSONWebSignatureSerializer as Serializer
@@ -16,7 +16,8 @@ from bulk_download import getDownloadLink, send_email
 from index_query import geneQuery, specificGeneQuery, speciesQuery, isolateQuery, specificIsolateQuery
 
 # data locations
-gene_dir = '/home/bacquerya-usr/' + os.getenv('GENE_FILES')
+# '/home/bacquerya-usr/' + os.getenv('GENE_FILES')
+gene_dir = os.getenv('GENE_FILES')
 SECRET_KEY = os.environ.get('FLASK_SECRET_KEY')
 app = Flask(__name__, instance_relative_config=True)
 app.config.update(
@@ -145,9 +146,10 @@ def bulkDownload():
             shutil.rmtree(raw_temp_dir)
             return jsonify({"downloadURL": downloadURL})
         else:
-            with open(os.path.join("..", gene_dir, temp_dir, "sequenceURLs.txt"), "w") as outSequences:
+            urlList = [url for sublist in urlList for url in sublist]
+            with open(os.path.join("..", gene_dir, "sequenceURLs.txt"), "w") as outSequences:
                 outSequences.write("\n".join(urlList))
-            return send_file(os.path.join("..", gene_dir, temp_dir, "sequenceURLs.txt"), as_attachment=True)
+            return send_file(os.path.join("..", gene_dir, "sequenceURLs.txt"), as_attachment=True)
 
 @app.route("/downloads/<token>")
 @cross_origin()
