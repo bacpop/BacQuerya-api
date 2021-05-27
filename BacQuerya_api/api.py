@@ -70,7 +70,7 @@ def postSeqResult():
         return "not a json post"
     if request.json:
         sequence_dict = request.json
-        query_sequence = sequence_dict['searchTerm']
+        query_sequence = sequence_dict['searchTerm'].replace(" ", "").upper()
         # search for uploaded sequence in COBS index
         sys.stderr.write("\nSearching COBS index\n")
         index_name = os.path.join(gene_dir, "31_index.cobs_compact")
