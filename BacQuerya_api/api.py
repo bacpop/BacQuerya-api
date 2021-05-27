@@ -147,9 +147,9 @@ def bulkDownload():
             return jsonify({"downloadURL": downloadURL})
         else:
             urlList = [url for sublist in urlList for url in sublist]
-            with open(os.path.join("..", gene_dir, "sequenceURLs.txt"), "w") as outSequences:
+            with open(os.path.join("..", temp_dir, "sequenceURLs.txt"), "w") as outSequences:
                 outSequences.write("\n".join(urlList))
-            return send_file(os.path.join("..", gene_dir, "sequenceURLs.txt"), as_attachment=True)
+            return send_file(os.path.join("..", temp_dir, "sequenceURLs.txt"), as_attachment=True)
 
 @app.route("/downloads/<token>")
 @cross_origin()
