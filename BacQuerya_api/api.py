@@ -10,6 +10,7 @@ import tempfile
 from tqdm import tqdm
 from types import SimpleNamespace
 from urllib.parse import unquote
+from werkzeug.utils import secure_filename
 
 from study_search import search_pubmed
 from bulk_download import getDownloadLink, send_email
@@ -188,6 +189,22 @@ def download_link(filepath):
 def alignementDownload(consistentName):
     """Send MSA for requested gene"""
     return send_file(os.path.join("..", gene_dir, "alignments", consistentName + ".fa"), as_attachment=True)
+
+@app.route('/upload_template', methods=['GET'])
+@cross_origin()
+def uploadTemplate():
+    """Send upload template file for study"""
+    return send_file(os.path.join("..", gene_dir, "upload_template.csv"), as_attachment=True)
+
+@app.route('/upload_accessions', methods=['POST'])
+@cross_origin()
+def uploadAccessions():
+    """Recieve user-uploaded accession IDs for study"""
+    upload_dir = os.path.join(gene_dir, "uploaded_accessions")
+    if not os.path.exists(upload_dir):
+        os.mkdir(upload_dir)
+    uploaded_file = request.files['file']
+    uploaded_file.save(os.path.join(upload_dir, secure_filename(uploaded_file.filename)))
 
 if __name__ == "__main__":
     app.run(debug=False,use_reloader=False)
