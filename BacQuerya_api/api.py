@@ -18,6 +18,7 @@ from index_query import geneQuery, specificGeneQuery, speciesQuery, isolateQuery
 
 # data locations
 gene_dir = '/home/bacquerya-usr/' + os.environ.get('GENE_FILES')
+#gene_dir = "gene_test_files"
 SECRET_KEY = os.environ.get('FLASK_SECRET_KEY')
 app = Flask(__name__, instance_relative_config=True)
 app.config.update(
@@ -184,11 +185,29 @@ def download_link(filepath):
     """Serve compressed genomic sequence file"""
     return send_file(os.path.join("..", gene_dir, filepath), as_attachment=True)
 
-@app.route('/alignment/<consistentName>', methods=['POST'])
+@app.route('/alignment/<consistentName>', methods=['GET', 'POST'])
 @cross_origin()
 def alignementDownload(consistentName):
     """Send MSA for requested gene"""
-    return send_file(os.path.join("..", gene_dir, "alignments", consistentName + ".fa"), as_attachment=True)
+    consistentName = "tetM"
+    return send_file(os.path.join("..", gene_dir, "alignments", consistentName + ".aln.fas"), as_attachment=True)
+
+@app.route('/alignmentView/<consistentName>', methods=['GET', 'POST'])
+@cross_origin()
+def alignementViewer(consistentName):
+    """Send MSA in JSON format for requested gene"""
+    consistentName = "tetM" + ".aln.fas"
+    with open(os.path.join(gene_dir, "alignments", consistentName)) as alnFile:
+        alignment = alnFile.read()
+    alignment = alignment.split(">")[1:]
+    sys.stderr.write("\nConverting MSA to JSON\n")
+    alignmentJSON = {}
+    for line in tqdm(alignment):
+        split = line.splitlines()
+        title = split[0]
+        sequence = split[1]
+        alignmentJSON[title] = sequence
+    return jsonify(alignmentJSON)
 
 @app.route('/upload_template', methods=['GET'])
 @cross_origin()
@@ -204,7 +223,16 @@ def uploadAccessions():
     if not os.path.exists(upload_dir):
         os.mkdir(upload_dir)
     uploaded_file = request.files['file']
-    uploaded_file.save(os.path.join(upload_dir, secure_filename(uploaded_file.filename)))
+    filename = os.path.join(upload_dir, secure_filename(uploaded_file.filename))
+    uploaded_file.save(filename)
+
+@app.route('/population_assembly_stats', methods=['GET'])
+@cross_origin()
+def populationStats():
+    """Send population assembly stats JSON file to frontend"""
+    with open(os.path.join(gene_dir, "population_assembly_stats.json")) as statsFile:
+        assemblyStats = json.loads(statsFile.read())
+    return jsonify(assemblyStats)
 
 if __name__ == "__main__":
     app.run(debug=False,use_reloader=False)

@@ -94,6 +94,6 @@ CMD [ "gunicorn", \
       "--worker-tmp-dir", "/dev/shm", \
       "--log-file=-", \
       "--timeout", "600", \
-      "--workers=2", "--threads=2", "--worker-class=gthread", \
+      "--workers=4", "--threads=2", "--worker-class=gthread", \
       "--chdir", "BacQuerya_api", \
       "api:app" ]
