@@ -14,7 +14,7 @@ from werkzeug.utils import secure_filename
 
 from study_search import search_pubmed
 from bulk_download import getDownloadLink, send_email
-from index_query import geneQuery, specificGeneQuery, speciesQuery, isolateQuery, specificIsolateQuery, indexAccessions
+from index_query import geneQuery, specificGeneQuery, speciesQuery, isolateQuery, specificIsolateQuery
 
 # data locations
 gene_dir = '/home/bacquerya-usr/' + os.environ.get('GENE_FILES')
@@ -225,7 +225,6 @@ def uploadAccessions():
     uploaded_file = request.files['file']
     filename = os.path.join(upload_dir, secure_filename(uploaded_file.filename))
     uploaded_file.save(filename)
-    indexAccessions(filename)
 
 @app.route('/population_assembly_stats', methods=['GET'])
 @cross_origin()
