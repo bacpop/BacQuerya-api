@@ -206,7 +206,7 @@ def alignementViewer(consistentName):
         split = line.splitlines()
         title = split[0]
         sequence = split[1]
-        alignmentJSON[title] = sequence
+        alignmentJSON[title] = sequence.upper()
     return jsonify(alignmentJSON)
 
 @app.route('/upload_template', methods=['GET'])
