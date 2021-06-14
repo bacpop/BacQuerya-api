@@ -14,7 +14,7 @@ from werkzeug.utils import secure_filename
 
 from study_search import search_pubmed
 from bulk_download import getDownloadLink, send_email
-from index_query import geneQuery, specificGeneQuery, speciesQuery, isolateQuery, specificIsolateQuery
+from index_query import geneQuery, specificGeneQuery, speciesQuery, isolateQuery, specificIsolateQuery, indexAccessions, getStudyAccessions
 
 # data locations
 gene_dir = '/home/bacquerya-usr/' + os.environ.get('GENE_FILES')
@@ -39,8 +39,9 @@ def queryGeneIndex():
         searchDict = request.json
         searchTerm = searchDict["searchTerm"]
         searchType = searchDict["searchType"]
+        pageNumber = int(searchDict["pageNumber"])
         if searchType == "gene":
-            searchResult = geneQuery(searchTerm)
+            searchResult = geneQuery(searchTerm, pageNumber)
         elif searchType == "consistentNameList":
             searchResult = specificGeneQuery(searchTerm)
         return jsonify({"searchResult": searchResult})
@@ -55,11 +56,12 @@ def queryIsolateIndex():
         searchDict = request.json
         searchTerm = searchDict["searchTerm"]
         searchType = searchDict["searchType"]
+        pageNumber = int(searchDict["pageNumber"])
         if searchType == "species":
-            searchResult = speciesQuery(searchTerm)
+            searchResult = speciesQuery(searchTerm, pageNumber)
         elif searchType == "isolate":
             searchFilters = searchDict["searchFilters"]
-            searchResult = isolateQuery(searchTerm, searchFilters)
+            searchResult = isolateQuery(searchTerm, searchFilters, pageNumber)
         elif searchType == "biosampleList":
             searchResult = specificIsolateQuery(searchTerm)
         return jsonify({"searchResult": searchResult})
@@ -189,14 +191,13 @@ def download_link(filepath):
 @cross_origin()
 def alignementDownload(consistentName):
     """Send MSA for requested gene"""
-    consistentName = "tetM"
     return send_file(os.path.join("..", gene_dir, "alignments", consistentName + ".aln.fas"), as_attachment=True)
 
 @app.route('/alignmentView/<consistentName>', methods=['GET', 'POST'])
 @cross_origin()
 def alignementViewer(consistentName):
     """Send MSA in JSON format for requested gene"""
-    consistentName = "tetM" + ".aln.fas"
+    consistentName = consistentName + ".aln.fas"
     with open(os.path.join(gene_dir, "alignments", consistentName)) as alnFile:
         alignment = alnFile.read()
     alignment = alignment.split(">")[1:]
@@ -225,6 +226,17 @@ def uploadAccessions():
     uploaded_file = request.files['file']
     filename = os.path.join(upload_dir, secure_filename(uploaded_file.filename))
     uploaded_file.save(filename)
+    indexAccessions(filename)
+
+@app.route('/retrieve_accessions/<DOI>', methods=['POST'])
+@cross_origin()
+def retrieveAccessions(DOI):
+    """Retrieve user-uploaded accession IDs for study"""
+    accessions = getStudyAccessions(DOI)
+    if not accessions:
+        return jsonify({"studyAccessions": accessions})
+    else:
+        return jsonify({"studyAccessions": []})
 
 @app.route('/population_assembly_stats', methods=['GET'])
 @cross_origin()
