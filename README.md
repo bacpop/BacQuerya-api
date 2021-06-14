@@ -19,18 +19,17 @@ Backend API for the BacQuerya website.
 ```/bulkdownloads```
 * Accepts a list of sequence URLs for isolates. If there are 100 or fewer sequences, the sequences are downloaded and tarred. If there are more than 100 sequences, a list of sequence download links for all relevant isolates is returned instead. If an email is specified, an email is sent containing a download link for the created file or directory.
 
-```/downloads/```
+```/downloads/<token>```
 * Uses an encoded token to check if the sequence download tarfile or txt file has successfully been created and serves a HTML page indicating success or failure.
 
-```/download_link/```
+```/download_link/<path:token>```
 * Sends the requested sequence file specified by the toke for download.
 
-
-```/alignment/```
+```/alignment/<consistentName>```
 * Sends a static multiple sequence alignment for the gene of interest.
 
-```/alignmentView/```
-* REST route to return a JSON of the relevant multiple sequence alignment file.
+```/alignmentView/<consistentName>```
+* REST route to return a JSON of the relevant multiple sequence alignment file by gene name.
 
 ```/upload_template```
 * Sends the upload template for submitting the accession IDs of isolates used in studies.
@@ -38,5 +37,8 @@ Backend API for the BacQuerya website.
 ```/upload_accessions```
 * Recieves and saves a CSV file containing the accession IDs of isolates used in a particular study. The accession IDs are then extracted and indexed with the study DOI using a redis database.
 
-```/population_assembly_stats```
+```/retrieve_accessions/<DOI>```
 * Queries a redis database to return a list of isolate accession IDs associated with a particular study DOI.
+
+```/population_assembly_stats```
+* Returns a JSON of population-wide isolate assembly statistics.
