@@ -42,3 +42,7 @@ Backend API for the BacQuerya website.
 
 ```/population_assembly_stats```
 * Returns a JSON of population-wide isolate assembly statistics.
+
+# Contributors
+
+The [BacQuerya-api](https://github.com/bacpop/BacQuerya-api) was developed by Daniel Anderson and John Lees.
