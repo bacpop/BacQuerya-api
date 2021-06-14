@@ -179,12 +179,14 @@ def serve_file(token):
     if not tarFilePath:
         return render_template('failed_download.html')
     else:
-        return render_template('successful_download.html', filepath=tarFilePath)
+        return render_template('successful_download.html', token=token)
 
-@app.route('/download_link/<path:filepath>')
+@app.route('/download_link/<path:token>')
 @cross_origin()
-def download_link(filepath):
+def download_link(token):
     """Serve compressed genomic sequence file"""
+    s = Serializer(app.config['SECRET_KEY'])
+    filepath = s.loads(token)['file_path']
     return send_file(os.path.join("..", gene_dir, filepath), as_attachment=True)
 
 @app.route('/alignment/<consistentName>', methods=['GET', 'POST'])
