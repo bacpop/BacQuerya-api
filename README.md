@@ -35,7 +35,7 @@ Backend API for the BacQuerya website.
 * Sends the upload template for submitting the accession IDs of isolates used in studies.
 
 ```/upload_accessions```
-* Recieves and saves a CSV file containing the accession IDs of isolates used in a particular study. The accession IDs are then extracted and indexed with the study DOI using a redis database.
+* Recieves and saves a CSV file containing the accession IDs of isolates used in a particular study. The accession IDs are then extracted and indexed with the study DOI using a SQLite database.
 
 ```/retrieve_accessions/<DOI>```
 * Queries a redis database to return a list of isolate accession IDs associated with a particular study DOI.
