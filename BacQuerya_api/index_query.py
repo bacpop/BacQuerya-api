@@ -2,9 +2,9 @@ from elasticsearch import Elasticsearch
 import json
 import os
 import pandas as pd
-import redis
+import sqlite3
 from tqdm import tqdm
-#from secrets import ELASTIC_API_URL, ELASTIC_GENE_NAME, ELASTIC_ISOLATE_NAME, ELASTIC_ISOLATE_API_ID, ELASTIC_ISOLATE_API_KEY, ELASTIC_GENE_API_ID, ELASTIC_GENE_API_KEY
+#from secrets import ELASTIC_API_URL, ELASTIC_GENE_NAME, ELASTIC_ISOLATE_NAME, ELASTIC_ISOLATE_API_ID, ELASTIC_ISOLATE_API_KEY, ELASTIC_GENE_API_ID, ELASTIC_GENE_API_KEY, GENE_DB, STUDY_DB
 
 def geneQuery(searchTerm, pageNumber):
     """Search for gene in elastic gene index"""
@@ -12,9 +12,6 @@ def geneQuery(searchTerm, pageNumber):
     apiID = os.environ.get("ELASTIC_GENE_API_ID")
     apiKEY = os.environ.get("ELASTIC_GENE_API_KEY")
     indexName = os.environ.get("ELASTIC_GENE_NAME")
-    redisURL = os.environ.get("REDIS_HOST")
-    redisPORT = os.environ.get("REDIS_PORT")
-    redisPASSWORD = os.environ.get("REDIS_PASSWORD")
     numResults = 100
     fetchData = {"size": numResults,
                 "from": numResults * pageNumber,
@@ -33,19 +30,21 @@ def geneQuery(searchTerm, pageNumber):
             }
     client = Elasticsearch([searchURL],
                            api_key=(apiID, apiKEY))
+    # SQLite DB to supplement gene metadata
+    sqlite_connection = sqlite3.connect(os.environ.get("GENE_DB"))
     geneResult = client.search(index = indexName,
                                body = fetchData,
                                request_timeout = 60)
-    redis_client = redis.StrictRedis(host=redisURL,
-                                     port=redisPORT,
-                                     password=redisPASSWORD,
-                                     decode_responses=True)
     # need to add metadata to elastic search results
     searchResults = []
     for result in geneResult["hits"]["hits"]:
-        redisResult = json.loads(redis_client.get(result["_source"]["gene_index"]))
-        result["_source"].update(redisResult)
+        db_command = 'SELECT * FROM "GENE_METADATA" WHERE "ID" = "' + str(result["_source"]["gene_index"]) + '";'
+        metadataResult = sqlite_connection.execute(db_command)
+        result["_source"].update({"geneMetadata": metadataResult})
+        for row in metadataResult:
+            result["_source"].update({"geneMetadata": row[1]})
         searchResults.append(result)
+    sqlite_connection.close()
     return searchResults
 
 def specificGeneQuery(geneList):
@@ -55,16 +54,10 @@ def specificGeneQuery(geneList):
     apiID = os.environ.get("ELASTIC_GENE_API_ID")
     apiKEY = os.environ.get("ELASTIC_GENE_API_KEY")
     indexName = os.environ.get("ELASTIC_GENE_NAME")
-    redisURL = os.environ.get("REDIS_HOST")
-    redisPORT = os.environ.get("REDIS_PORT")
-    redisPASSWORD = os.environ.get("REDIS_PASSWORD")
     metadata_list = []
     client = Elasticsearch([searchURL],
                            api_key=(apiID, apiKEY))
-    redis_client = redis.StrictRedis(host=redisURL,
-                                     port=redisPORT,
-                                     password=redisPASSWORD,
-                                     decode_responses=True)
+    sqlite_connection = sqlite3.connect(os.environ.get("GENE_DB"))
     for geneName in geneList:
         fetchData = {"size": 10,
                         "query" : {
@@ -77,11 +70,14 @@ def specificGeneQuery(geneList):
                                      body = fetchData,
                                      request_timeout = 60)
         if not len(geneMetadata["hits"]["hits"]) == 0:
-            redisResult = json.loads(redis_client.get(geneMetadata["hits"]["hits"][0]["_source"]["gene_index"]))
-            geneMetadata["hits"]["hits"][0].update(redisResult)
-            metadata_list.append(geneMetadata["hits"]["hits"][0])
+            db_command = 'SELECT * FROM "GENE_METADATA" WHERE "ID" = ' + str(geneMetadata["hits"]["hits"][0]["_source"]["gene_index"]) + ';'
+            metadataResult = sqlite_connection.execute(db_command)
+            for row in metadataResult:
+                geneMetadata["hits"]["hits"][0]["_source"].update({"geneMetadata": row[1]})
+                metadata_list.append(geneMetadata["hits"]["hits"][0])
         else:
             metadata_list.append(None)
+    sqlite_connection.close()
     return metadata_list
 
 def speciesQuery(searchTerm, pageNumber):
@@ -214,6 +210,7 @@ def specificIsolateQuery(accessionList):
 def indexAccessions(filename):
     """Read csv file posted from frontend and add genomic information to SQL database"""
     accessionDF = pd.read_csv(filename)
+    DOI = filename.replace(".csv", "")
     accessions = []
     for index, row in tqdm(accessionDF.iterrows()):
         if not row["BioSample_accession"] == "" or not row["BioSample_accession"] == " ":
@@ -228,17 +225,22 @@ def indexAccessions(filename):
         elif not row["ENA_run_accession"] == "" or not row["ENA_run_accession"] == " ":
             accession = row["ENA_run_accession"]
             accessions.append(accession)
-    # add accessions to redis db
-    redis_client = redis.StrictRedis(host=os.environ.get("REDIS_HOST"),
-                                    port=os.environ.get("REDIS_PORT"),
-                                    password=os.environ.get("REDIS_PASSWORD"),
-                                    decode_responses=True)
-    redis_client.set(filename.replace(".csv", ""), ",".join(accessions))
+    # add accessions to SQLite db
+    sqlite_connection = sqlite3.connect(os.environ.get("STUDY_DB"))
+    sqlite_connection.execute('''CREATE TABLE STUDY_ACCESSIONS
+         (DOI TEXT PRIMARY KEY     NOT NULL,
+          ACCESSIONS           TEXT    NOT NULL);''')
+    db_command = "INSERT INTO STUDY_ACCESSIONS (DOI,ACCESSIONS) \
+                VALUES (" + DOI + ", '" + ",".join(accessions) + "')"
+    sqlite_connection.execute(db_command)
+    sqlite_connection.commit()
+    sqlite_connection.close()
 
 def getStudyAccessions(DOI):
-    redis_client = redis.StrictRedis(host=os.environ.get("REDIS_HOST"),
-                                    port=os.environ.get("REDIS_PORT"),
-                                    password=os.environ.get("REDIS_PASSWORD"),
-                                    decode_responses=True)
-    accessions = (redis_client.get(DOI)).split(",")
+    sqlite_connection = sqlite3.connect(os.environ.get("STUDY_DB"))
+    db_command = 'SELECT * FROM "STUDY_ACCESSIONS" WHERE "DOI" = ' + DOI + ';'
+    accessionResult = sqlite_connection.execute(db_command)
+    for row in accessionResult:
+        accessions = row[1].split(",")
+    sqlite_connection.close()
     return accessions
