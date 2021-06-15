@@ -8,7 +8,6 @@ import shutil
 import sys
 import tempfile
 from tqdm import tqdm
-from types import SimpleNamespace
 from urllib.parse import unquote
 from werkzeug.utils import secure_filename
 
@@ -19,6 +18,8 @@ from index_query import geneQuery, specificGeneQuery, speciesQuery, isolateQuery
 # data locations
 gene_dir = '/home/bacquerya-usr/' + os.environ.get('GENE_FILES')
 #gene_dir = "gene_test_files"
+gene_database = os.path.join(gene_dir, os.environ.get('GENE_DB'))
+study_database = os.path.join(gene_dir, os.environ.get('STUDY_DB'))
 SECRET_KEY = os.environ.get('FLASK_SECRET_KEY')
 app = Flask(__name__, instance_relative_config=True)
 app.config.update(
@@ -39,11 +40,14 @@ def queryGeneIndex():
         searchDict = request.json
         searchTerm = searchDict["searchTerm"]
         searchType = searchDict["searchType"]
-        pageNumber = int(searchDict["pageNumber"])
+        if "pageNumber" in searchDict.keys():
+            pageNumber = int(searchDict["pageNumber"]) - 1
+        else:
+            pageNumber = 0
         if searchType == "gene":
-            searchResult = geneQuery(searchTerm, pageNumber)
+            searchResult = geneQuery(searchTerm, pageNumber, gene_database)
         elif searchType == "consistentNameList":
-            searchResult = specificGeneQuery(searchTerm)
+            searchResult = specificGeneQuery(searchTerm, gene_database)
         return jsonify({"searchResult": searchResult})
 
 @app.route('/isolateQuery', methods=['POST'])
@@ -228,13 +232,13 @@ def uploadAccessions():
     uploaded_file = request.files['file']
     filename = os.path.join(upload_dir, secure_filename(uploaded_file.filename))
     uploaded_file.save(filename)
-    indexAccessions(filename)
+    indexAccessions(filename, study_database)
 
 @app.route('/retrieve_accessions/<DOI>', methods=['POST'])
 @cross_origin()
 def retrieveAccessions(DOI):
     """Retrieve user-uploaded accession IDs for study"""
-    accessions = getStudyAccessions(DOI)
+    accessions = getStudyAccessions(DOI, study_database)
     if not accessions:
         return jsonify({"studyAccessions": accessions})
     else:

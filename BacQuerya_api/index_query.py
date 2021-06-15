@@ -6,7 +6,7 @@ import sqlite3
 from tqdm import tqdm
 #from secrets import ELASTIC_API_URL, ELASTIC_GENE_NAME, ELASTIC_ISOLATE_NAME, ELASTIC_ISOLATE_API_ID, ELASTIC_ISOLATE_API_KEY, ELASTIC_GENE_API_ID, ELASTIC_GENE_API_KEY, GENE_DB, STUDY_DB
 
-def geneQuery(searchTerm, pageNumber):
+def geneQuery(searchTerm, pageNumber, gene_database):
     """Search for gene in elastic gene index"""
     searchURL = os.environ.get("ELASTIC_API_URL")
     apiID = os.environ.get("ELASTIC_GENE_API_ID")
@@ -31,7 +31,7 @@ def geneQuery(searchTerm, pageNumber):
     client = Elasticsearch([searchURL],
                            api_key=(apiID, apiKEY))
     # SQLite DB to supplement gene metadata
-    sqlite_connection = sqlite3.connect(os.environ.get("GENE_DB"))
+    sqlite_connection = sqlite3.connect(gene_database)
     geneResult = client.search(index = indexName,
                                body = fetchData,
                                request_timeout = 60)
@@ -47,7 +47,7 @@ def geneQuery(searchTerm, pageNumber):
     sqlite_connection.close()
     return searchResults
 
-def specificGeneQuery(geneList):
+def specificGeneQuery(geneList, gene_database):
     #### This function is not necessary. We just need to search for a single gene name when loading the gene overview from the URL, not a list of them.
     """Search for list of genes in elastic gene index"""
     searchURL = os.environ.get("ELASTIC_API_URL")
@@ -57,7 +57,7 @@ def specificGeneQuery(geneList):
     metadata_list = []
     client = Elasticsearch([searchURL],
                            api_key=(apiID, apiKEY))
-    sqlite_connection = sqlite3.connect(os.environ.get("GENE_DB"))
+    sqlite_connection = sqlite3.connect(gene_database)
     for geneName in geneList:
         fetchData = {"size": 10,
                         "query" : {
@@ -207,7 +207,7 @@ def specificIsolateQuery(accessionList):
             metadata_list.append(None)
     return metadata_list
 
-def indexAccessions(filename):
+def indexAccessions(filename, study_database):
     """Read csv file posted from frontend and add genomic information to SQL database"""
     accessionDF = pd.read_csv(filename)
     DOI = filename.replace(".csv", "")
@@ -226,7 +226,7 @@ def indexAccessions(filename):
             accession = row["ENA_run_accession"]
             accessions.append(accession)
     # add accessions to SQLite db
-    sqlite_connection = sqlite3.connect(os.environ.get("STUDY_DB"))
+    sqlite_connection = sqlite3.connect(study_database)
     sqlite_connection.execute('''CREATE TABLE STUDY_ACCESSIONS
          (DOI TEXT PRIMARY KEY     NOT NULL,
           ACCESSIONS           TEXT    NOT NULL);''')
@@ -236,8 +236,8 @@ def indexAccessions(filename):
     sqlite_connection.commit()
     sqlite_connection.close()
 
-def getStudyAccessions(DOI):
-    sqlite_connection = sqlite3.connect(os.environ.get("STUDY_DB"))
+def getStudyAccessions(DOI, study_database):
+    sqlite_connection = sqlite3.connect(study_database)
     db_command = 'SELECT * FROM "STUDY_ACCESSIONS" WHERE "DOI" = ' + DOI + ';'
     accessionResult = sqlite_connection.execute(db_command)
     for row in accessionResult:
