@@ -93,7 +93,7 @@ CMD [ "gunicorn", \
       "-b", "0.0.0.0:8000", \
       "--worker-tmp-dir", "/dev/shm", \
       "--log-file=-", \
-      "--timeout", "600", \
+      "--timeout", "1000", \
       "--workers=4", "--threads=2", "--worker-class=gthread", \
       "--chdir", "BacQuerya_api", \
       "api:app" ]
