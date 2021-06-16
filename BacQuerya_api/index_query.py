@@ -1,15 +1,20 @@
 from elasticsearch import Elasticsearch
+import json
 import os
+import pandas as pd
+import sqlite3
+from tqdm import tqdm
+#from secrets import ELASTIC_API_URL, ELASTIC_GENE_NAME, ELASTIC_ISOLATE_NAME, ELASTIC_ISOLATE_API_ID, ELASTIC_ISOLATE_API_KEY, ELASTIC_GENE_API_ID, ELASTIC_GENE_API_KEY, GENE_DB, STUDY_DB
 
-#from secrets import ELASTIC_API_URL, ELASTIC_GENE_NAME, ELASTIC_ISOLATE_NAME, ELASTIC_ISOLATE_API_ID, ELASTIC_ISOLATE_API_KEY, ELASTIC_GENE_API_ID, ELASTIC_GENE_API_KEY
-
-def geneQuery(searchTerm):
+def geneQuery(searchTerm, pageNumber, gene_database):
     """Search for gene in elastic gene index"""
     searchURL = os.environ.get("ELASTIC_API_URL")
     apiID = os.environ.get("ELASTIC_GENE_API_ID")
     apiKEY = os.environ.get("ELASTIC_GENE_API_KEY")
     indexName = os.environ.get("ELASTIC_GENE_NAME")
-    fetchData = {"size": 1000,
+    numResults = 100
+    fetchData = {"size": numResults,
+                "from": numResults * pageNumber,
                 "query" : {
                     "multi_match" : {
                         "query" : searchTerm,
@@ -25,12 +30,25 @@ def geneQuery(searchTerm):
             }
     client = Elasticsearch([searchURL],
                            api_key=(apiID, apiKEY))
+    # SQLite DB to supplement gene metadata
+    sqlite_connection = sqlite3.connect(gene_database)
     geneResult = client.search(index = indexName,
                                body = fetchData,
                                request_timeout = 60)
-    return geneResult["hits"]["hits"]
+    # need to add metadata to elastic search results
+    searchResults = []
+    for result in geneResult["hits"]["hits"]:
+        db_command = 'SELECT * FROM "GENE_METADATA" WHERE "ID" = "' + str(result["_source"]["gene_index"]) + '";'
+        metadataResult = sqlite_connection.execute(db_command)
+        result["_source"].update({"geneMetadata": metadataResult})
+        for row in metadataResult:
+            result["_source"].update({"geneMetadata": row[1]})
+        searchResults.append(result)
+    sqlite_connection.close()
+    return searchResults
 
-def specificGeneQuery(geneList):
+def specificGeneQuery(geneList, gene_database):
+    #### This function is not necessary. We just need to search for a single gene name when loading the gene overview from the URL, not a list of them.
     """Search for list of genes in elastic gene index"""
     searchURL = os.environ.get("ELASTIC_API_URL")
     apiID = os.environ.get("ELASTIC_GENE_API_ID")
@@ -39,36 +57,44 @@ def specificGeneQuery(geneList):
     metadata_list = []
     client = Elasticsearch([searchURL],
                            api_key=(apiID, apiKEY))
+    sqlite_connection = sqlite3.connect(gene_database)
     for geneName in geneList:
-        fetchData = {"size": 1000,
-                    "query" : {
-                        "match": {
-                            "consistentNames": geneName
+        fetchData = {"size": 10,
+                        "query" : {
+                            "match": {
+                                "consistentNames": geneName
+                                }
                             }
                         }
-                    }
         geneMetadata = client.search(index = indexName,
                                      body = fetchData,
                                      request_timeout = 60)
         if not len(geneMetadata["hits"]["hits"]) == 0:
-            metadata_list.append(geneMetadata["hits"]["hits"][0])
+            db_command = 'SELECT * FROM "GENE_METADATA" WHERE "ID" = ' + str(geneMetadata["hits"]["hits"][0]["_source"]["gene_index"]) + ';'
+            metadataResult = sqlite_connection.execute(db_command)
+            for row in metadataResult:
+                geneMetadata["hits"]["hits"][0]["_source"].update({"geneMetadata": row[1]})
+                metadata_list.append(geneMetadata["hits"]["hits"][0])
         else:
             metadata_list.append(None)
+    sqlite_connection.close()
     return metadata_list
 
-def speciesQuery(searchTerm):
+def speciesQuery(searchTerm, pageNumber):
     """Get all species results in elastic isolate index"""
     searchURL = os.environ.get("ELASTIC_API_URL")
     apiID = os.environ.get("ELASTIC_ISOLATE_API_ID")
     apiKEY = os.environ.get("ELASTIC_ISOLATE_API_KEY")
     indexName = os.environ.get("ELASTIC_ISOLATE_NAME")
-    fetchData = {"size": 10000,
-                "query" : {
-                    "match" : {
-                        "Organism_name" : searchTerm
-                        }
+    numResults = 100
+    fetchData = {"size": numResults,
+                "from": numResults * pageNumber,
+                    "query" : {
+                        "match" : {
+                            "Organism_name" : searchTerm
+                            }
+                    }
                 }
-            }
     client = Elasticsearch([searchURL],
                            api_key=(apiID, apiKEY))
     speciesResult = client.search(index = indexName,
@@ -103,7 +129,7 @@ def getFilters(searchFilters):
             filterList.append({"range": {"Year": {"gte": int(years[0]), "lte": int(years[1])}}})
     return filterList
 
-def isolateQuery(searchTerm, searchFilters):
+def isolateQuery(searchTerm, searchFilters, pageNumber):
     """Search through isolates in elastic isolate index"""
     searchURL = os.environ.get("ELASTIC_API_URL")
     apiID = os.environ.get("ELASTIC_ISOLATE_API_ID")
@@ -111,7 +137,12 @@ def isolateQuery(searchTerm, searchFilters):
     indexName = os.environ.get("ELASTIC_ISOLATE_NAME")
     # apply filters to the elasitcsearch output
     filterList = getFilters(searchFilters)
-    fetchData = {"size": 1000,
+    numResults = 100
+    fetchData = {"size": numResults,
+                "from": numResults * pageNumber,
+                "sort" : [
+                    {"rankScore" : {"order" : "desc"}}
+                ],
                 "query": {
                     "bool": {
                         "must" : {
@@ -156,7 +187,7 @@ def specificIsolateQuery(accessionList):
     client = Elasticsearch([searchURL],
                            api_key=(apiID, apiKEY))
     for accession in accessionList:
-        fetchData = {"size": 1000,
+        fetchData = {"size": 10,
                     "query": {
                         "bool": {
                             "must": [{
@@ -175,3 +206,41 @@ def specificIsolateQuery(accessionList):
         else:
             metadata_list.append(None)
     return metadata_list
+
+def indexAccessions(filename, study_database):
+    """Read csv file posted from frontend and add genomic information to SQL database"""
+    accessionDF = pd.read_csv(filename)
+    DOI = filename.replace(".csv", "")
+    accessions = []
+    for index, row in tqdm(accessionDF.iterrows()):
+        if not row["BioSample_accession"] == "" or not row["BioSample_accession"] == " ":
+            accession = row["BioSample_accession"]
+            accessions.append(accession)
+        elif not row["NCBI_GenBank_accession"] == "" or not row["NCBI_GenBank_accession"] == " ":
+            accession = row["NCBI_GenBank_accession"]
+            accessions.append(accession)
+        elif not row["NCBI_RefSeq_accession"] == "" or not row["NCBI_RefSeq_accession"] == " ":
+            accession = row["NCBI_RefSeq_accession"]
+            accessions.append(accession)
+        elif not row["ENA_run_accession"] == "" or not row["ENA_run_accession"] == " ":
+            accession = row["ENA_run_accession"]
+            accessions.append(accession)
+    # add accessions to SQLite db
+    sqlite_connection = sqlite3.connect(study_database)
+    sqlite_connection.execute('''CREATE TABLE STUDY_ACCESSIONS
+         (DOI TEXT PRIMARY KEY     NOT NULL,
+          ACCESSIONS           TEXT    NOT NULL);''')
+    db_command = "INSERT INTO STUDY_ACCESSIONS (DOI,ACCESSIONS) \
+                VALUES (" + DOI + ", '" + ",".join(accessions) + "')"
+    sqlite_connection.execute(db_command)
+    sqlite_connection.commit()
+    sqlite_connection.close()
+
+def getStudyAccessions(DOI, study_database):
+    sqlite_connection = sqlite3.connect(study_database)
+    db_command = 'SELECT * FROM "STUDY_ACCESSIONS" WHERE "DOI" = ' + DOI + ';'
+    accessionResult = sqlite_connection.execute(db_command)
+    for row in accessionResult:
+        accessions = row[1].split(",")
+    sqlite_connection.close()
+    return accessions
