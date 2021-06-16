@@ -38,7 +38,7 @@ Backend API for the BacQuerya website.
 * Recieves and saves a CSV file containing the accession IDs of isolates used in a particular study. The accession IDs are then extracted and indexed with the study DOI using a SQLite database.
 
 ```/retrieve_accessions/<DOI>```
-* Queries a redis database to return a list of isolate accession IDs associated with a particular study DOI.
+* Queries a SQLite database to return a list of isolate accession IDs associated with a particular study DOI.
 
 ```/population_assembly_stats```
 * Returns a JSON of population-wide isolate assembly statistics.
