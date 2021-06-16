@@ -11,7 +11,7 @@ Backend API for the BacQuerya website.
 * Uses a ```POST``` method to search for an isolate query in the elastic isolate index. If ```searchType = isolate``` the route returns a JSON containing a list of search results. If ```searchType = species``` returns all *S. pneumoniae* isolate results, If ```searchType = biosampleList```, searches for each biosample in the index and returns the metadata for the highest ranked result for each BioSample. The ```pageNumber``` parameter tells elastic which chunk of the search results should be returned: ```pageNumber == 1``` returns the first 100 results, ```pageNumber == 2``` returns the second 100 results etc.
 
 ```/sequence```
-* Searches for a query sequence in a static COBS index available through the BacQuerya storage instance. Returns a list of dictionaries where the key is the gene name and the value is the proportion of matching k-mers between the query sequence and the gene sequence in the result.
+* Searches for a query sequence in a static COBS index available through the BacQuerya storage instance. Returns a list of key value pairs where the key is the gene name and the value is the proportion of matching k-mers between the query sequence and the gene sequence in the result.
 
 ```/study```
 * Searches for a query term in the PubMed database using the Biopython entrez API.
