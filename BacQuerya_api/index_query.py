@@ -73,7 +73,7 @@ def specificGeneQuery(geneList, gene_database):
             db_command = 'SELECT * FROM "GENE_METADATA" WHERE "ID" = ' + str(geneMetadata["hits"]["hits"][0]["_source"]["gene_index"]) + ';'
             metadataResult = sqlite_connection.execute(db_command)
             for row in metadataResult:
-                geneMetadata["hits"]["hits"][0]["_source"].update({"geneMetadata": row[1]})
+                geneMetadata["hits"]["hits"][0]["_source"].update({"geneMetadata": row[1].replace("/", "")})
                 metadata_list.append(geneMetadata["hits"]["hits"][0])
         else:
             metadata_list.append(None)
