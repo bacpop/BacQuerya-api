@@ -23,7 +23,7 @@ Backend API for the BacQuerya website.
 * Uses an encoded token to check if the sequence download tarfile or txt file has successfully been created and serves a HTML page indicating success or failure.
 
 ```/download_link/<path:token>```
-* Sends the requested sequence file specified by the toke for download.
+* Sends the requested sequence file specified by the token for download.
 
 ```/alignment/<consistentName>```
 * Sends a static multiple sequence alignment for the gene of interest.
