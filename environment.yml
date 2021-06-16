@@ -17,4 +17,4 @@ dependencies:
   - joblib
   - itsdangerous
   - elasticsearch
-  - redis
+  - pandas
