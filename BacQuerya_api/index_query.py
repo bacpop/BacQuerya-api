@@ -147,7 +147,7 @@ def isolateQuery(searchTerm, searchFilters, pageNumber):
                     "bool": {
                         "must" : {
                             "multi_match" : {
-                            "query":      searchTerm,
+                            "query": searchTerm,
                             "fields" : [
                                 "isolateName",
                                 "isolateNameUnderscore",

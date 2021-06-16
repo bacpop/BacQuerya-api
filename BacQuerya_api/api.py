@@ -60,7 +60,10 @@ def queryIsolateIndex():
         searchDict = request.json
         searchTerm = searchDict["searchTerm"]
         searchType = searchDict["searchType"]
-        pageNumber = int(searchDict["pageNumber"])
+        if "pageNumber" in searchDict.keys():
+            pageNumber = int(searchDict["pageNumber"]) - 1
+        else:
+            pageNumber = 0
         if searchType == "species":
             searchResult = speciesQuery(searchTerm, pageNumber)
         elif searchType == "isolate":
