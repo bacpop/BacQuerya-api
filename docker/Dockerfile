@@ -39,11 +39,10 @@ RUN echo "Defaults rootpw" >> /etc/sudoers
    # && source ~/.bashrc
 
 RUN curl https://packages.microsoft.com/keys/microsoft.asc | apt-key add - \
-  && curl https://packages.microsoft.com/config/debian/10/prod.list > /etc/apt/sources.list.d/mssql-release.list \
+  && curl https://packages.microsoft.com/config/ubuntu/20.04/prod.list > /etc/apt/sources.list.d/mssql-release.list \
   && apt-get update \
   && apt-get install -y --no-install-recommends --allow-unauthenticated msodbcsql17 mssql-tools \
-  && echo 'export PATH="$PATH:/opt/mssql-tools/bin"' >> ~/.bash_profile \
-  && echo 'export PATH="$PATH:/opt/mssql-tools/bin"' >> ~/.bashrc
+  && echo 'export PATH="$PATH:/opt/mssql-tools/bin"' >> ~/.profile \
 
 # Create a non-root user
 ARG username=bacquerya-usr
