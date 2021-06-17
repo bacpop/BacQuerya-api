@@ -26,6 +26,14 @@ COPY docker/sshd_config /etc/ssh
 # Use root password for sudo access
 RUN echo "Defaults rootpw" >> /etc/sudoers
 
+# install the ODBC driver to query the BacQuerya Azure SQL database
+RUN apt-get update && apt-get install -y gnupg \
+    && curl https://packages.microsoft.com/keys/microsoft.asc | apt-key add - \
+    && curl https://packages.microsoft.com/config/ubuntu/20.04/prod.list > /etc/apt/sources.list.d/mssql-release.list \
+    && exit \
+    && apt-get update \
+    && ACCEPT_EULA=Y apt-get install -y msodbcsql17
+
 # Create a non-root user
 ARG username=bacquerya-usr
 ARG uid=1000
