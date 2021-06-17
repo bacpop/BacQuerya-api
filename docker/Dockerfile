@@ -72,8 +72,6 @@ RUN curl https://packages.microsoft.com/keys/microsoft.asc | apt-key add - \
     && ACCEPT_EULA=Y apt-get install -y mssql-tools \
     && apt-get install unixodbc-dev \
     && echo 'export PATH="$PATH:/opt/mssql-tools/bin"' >> ~/.profile \
-    && echo 'export PATH="$PATH:/opt/mssql-tools/bin"' >> ~/.bash_profile \
-    && echo 'export PATH="$PATH:/opt/mssql-tools/bin"' >> ~/.bashrc \
     && source ~/.bashrc
 
 # make conda activate command available from /bin/bash --login shells
