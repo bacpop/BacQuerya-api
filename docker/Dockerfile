@@ -26,19 +26,6 @@ COPY docker/sshd_config /etc/ssh
 # Use root password for sudo access
 RUN echo "Defaults rootpw" >> /etc/sudoers
 
-# install the ODBC driver to query the BacQuerya Azure SQL database
-RUN curl https://packages.microsoft.com/keys/microsoft.asc | apt-key add - \
-    && curl https://packages.microsoft.com/config/ubuntu/20.04/prod.list > /etc/apt/sources.list.d/mssql-release.list \
-    && exit \
-    && apt-get update \
-    && ACCEPT_EULA=Y apt-get install -y msodbcsql17 \
-    && ACCEPT_EULA=Y apt-get install -y mssql-tools \
-    && apt-get install unixodbc-dev \
-    && echo 'export PATH="$PATH:/opt/mssql-tools/bin"' >> ~/.profile \
-    && echo 'export PATH="$PATH:/opt/mssql-tools/bin"' >> ~/.bash_profile \
-    && echo 'export PATH="$PATH:/opt/mssql-tools/bin"' >> ~/.bashrc \
-    && source ~/.bashrc
-
 # Create a non-root user
 ARG username=bacquerya-usr
 ARG uid=1000
@@ -75,6 +62,19 @@ RUN wget --quiet https://repo.anaconda.com/miniconda/Miniconda3-$MINICONDA_VERSI
 
 # make non-activate conda commands available
 ENV PATH=$CONDA_DIR/bin:$PATH
+
+# install the ODBC driver to query the BacQuerya Azure SQL database
+RUN curl https://packages.microsoft.com/keys/microsoft.asc | apt-key add - \
+    && curl https://packages.microsoft.com/config/ubuntu/20.04/prod.list > /etc/apt/sources.list.d/mssql-release.list \
+    && exit \
+    && apt-get update \
+    && ACCEPT_EULA=Y apt-get install -y msodbcsql17 \
+    && ACCEPT_EULA=Y apt-get install -y mssql-tools \
+    && apt-get install unixodbc-dev \
+    && echo 'export PATH="$PATH:/opt/mssql-tools/bin"' >> ~/.profile \
+    && echo 'export PATH="$PATH:/opt/mssql-tools/bin"' >> ~/.bash_profile \
+    && echo 'export PATH="$PATH:/opt/mssql-tools/bin"' >> ~/.bashrc \
+    && source ~/.bashrc
 
 # make conda activate command available from /bin/bash --login shells
 RUN echo ". $CONDA_DIR/etc/profile.d/conda.sh" >> ~/.profile
