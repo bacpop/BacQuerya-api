@@ -59,9 +59,9 @@ def specificGeneQuery(geneList):
             with conn.cursor() as cursor:
                 if not len(geneMetadata["hits"]["hits"]) == 0:
                     db_command = 'SELECT * FROM "GENE_METADATA" WHERE "ID" = ' + str(geneMetadata["hits"]["hits"][0]["_source"]["gene_index"]) + ';'
-                    row = cursor.execute(db_command)
+                    cursor.execute(db_command)
                     #row = cursor.fetchone()
-                    for line in row:
+                    for line in cursor.fetchall():
                         geneMetadata["hits"]["hits"][0]["_source"].update({"geneMetadata": line[1]})
                         metadata_list.append(geneMetadata["hits"]["hits"][0])
                 else:
@@ -226,8 +226,8 @@ def getStudyAccessions(DOI):
     with pyodbc.connect('DRIVER='+os.environ.get("SQL_DRIVER")+';SERVER='+os.environ.get("SQL_SERVER")+';PORT=1433;DATABASE='+os.environ.get("SQL_DB")+';UID='+os.environ.get("SQL_USERNAME")+';PWD='+ os.environ.get("SQL_PASSWORD")) as conn:
         with conn.cursor() as cursor:
             db_command = 'SELECT * FROM "STUDY_ACCESSIONS" WHERE "DOI" = ' + DOI + ';'
-            accessionResult = cursor.execute(db_command)
+            cursor.execute(db_command)
             #row = cursor.fetchone()
-            for row in accessionResult:
+            for row in cursor.fetchall():
                 accessions = row[1].split(",")
     return accessions
