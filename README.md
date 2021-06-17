@@ -45,7 +45,12 @@ Backend API for the BacQuerya website.
 
 # Testing
 
-To run the flask server locally at [http://localhost:5000](http://localhost:5000) install the dependencies in ```environment.yml``` as well as the [ODBC driver](https://docs.microsoft.com/en-us/sql/connect/odbc/download-odbc-driver-for-sql-server?view=sql-server-ver15) to connect to the Azure SQL database.
+To run the flask server locally at [http://localhost:5000](http://localhost:5000) install the dependencies with:
+```
+conda env create -f environment.yml
+conda activate BQ_api
+``` 
+To connect to and retrieve entries from the Azure SQL database, it is also necessary to install the [ODBC driver](https://docs.microsoft.com/en-us/sql/connect/odbc/download-odbc-driver-for-sql-server?view=sql-server-ver15). 
 
 # Contributors
 
