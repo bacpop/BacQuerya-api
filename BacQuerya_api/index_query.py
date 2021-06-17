@@ -1,12 +1,11 @@
 from elasticsearch import Elasticsearch
-import json
 import os
 import pandas as pd
-import sqlite3
+import pyodbc
 from tqdm import tqdm
-#from secrets import ELASTIC_API_URL, ELASTIC_GENE_NAME, ELASTIC_ISOLATE_NAME, ELASTIC_ISOLATE_API_ID, ELASTIC_ISOLATE_API_KEY, ELASTIC_GENE_API_ID, ELASTIC_GENE_API_KEY, GENE_DB, STUDY_DB
+#from secrets import ELASTIC_API_URL, ELASTIC_GENE_NAME, ELASTIC_ISOLATE_NAME, ELASTIC_ISOLATE_API_ID, ELASTIC_ISOLATE_API_KEY, ELASTIC_GENE_API_ID, ELASTIC_GENE_API_KEY, SQL_SERVER, SQL_DB, SQL_USERNAME, SQL_PASSWORD, SQL_DRIVER
 
-def geneQuery(searchTerm, pageNumber, gene_database):
+def geneQuery(searchTerm, pageNumber):
     """Search for gene in elastic gene index"""
     searchURL = os.environ.get("ELASTIC_API_URL")
     apiID = os.environ.get("ELASTIC_GENE_API_ID")
@@ -30,24 +29,12 @@ def geneQuery(searchTerm, pageNumber, gene_database):
             }
     client = Elasticsearch([searchURL],
                            api_key=(apiID, apiKEY))
-    # SQLite DB to supplement gene metadata
-    sqlite_connection = sqlite3.connect(gene_database)
     geneResult = client.search(index = indexName,
                                body = fetchData,
                                request_timeout = 60)
-    # need to add metadata to elastic search results
-    searchResults = []
-    for result in geneResult["hits"]["hits"]:
-        db_command = 'SELECT * FROM "GENE_METADATA" WHERE "ID" = "' + str(result["_source"]["gene_index"]) + '";'
-        metadataResult = sqlite_connection.execute(db_command)
-        result["_source"].update({"geneMetadata": metadataResult})
-        for row in metadataResult:
-            result["_source"].update({"geneMetadata": row[1]})
-        searchResults.append(result)
-    sqlite_connection.close()
-    return searchResults
+    return geneResult
 
-def specificGeneQuery(geneList, gene_database):
+def specificGeneQuery(geneList):
     #### This function is not necessary. We just need to search for a single gene name when loading the gene overview from the URL, not a list of them.
     """Search for list of genes in elastic gene index"""
     searchURL = os.environ.get("ELASTIC_API_URL")
@@ -57,7 +44,6 @@ def specificGeneQuery(geneList, gene_database):
     metadata_list = []
     client = Elasticsearch([searchURL],
                            api_key=(apiID, apiKEY))
-    sqlite_connection = sqlite3.connect(gene_database)
     for geneName in geneList:
         fetchData = {"size": 10,
                         "query" : {
@@ -69,15 +55,17 @@ def specificGeneQuery(geneList, gene_database):
         geneMetadata = client.search(index = indexName,
                                      body = fetchData,
                                      request_timeout = 60)
-        if not len(geneMetadata["hits"]["hits"]) == 0:
-            db_command = 'SELECT * FROM "GENE_METADATA" WHERE "ID" = ' + str(geneMetadata["hits"]["hits"][0]["_source"]["gene_index"]) + ';'
-            metadataResult = sqlite_connection.execute(db_command)
-            for row in metadataResult:
-                geneMetadata["hits"]["hits"][0]["_source"].update({"geneMetadata": row[1].replace("/", "")})
-                metadata_list.append(geneMetadata["hits"]["hits"][0])
-        else:
-            metadata_list.append(None)
-    sqlite_connection.close()
+        with pyodbc.connect('DRIVER='+os.environ.get("SQL_DRIVER")+';SERVER='+os.environ.get("SQL_SERVER")+';PORT=1433;DATABASE='+os.environ.get("SQL_DB")+';UID='+os.environ.get("SQL_USERNAME")+';PWD='+ os.environ.get("SQL_PASSWORD")) as conn:
+            with conn.cursor() as cursor:
+                if not len(geneMetadata["hits"]["hits"]) == 0:
+                    db_command = 'SELECT * FROM "GENE_METADATA" WHERE "GENE_ID" = ' + str(geneMetadata["hits"]["hits"][0]["_source"]["gene_index"]) + ';'
+                    cursor.execute(db_command)
+                    #row = cursor.fetchone()
+                    for line in cursor.fetchall():
+                        geneMetadata["hits"]["hits"][0]["_source"].update({"geneMetadata": line[1]})
+                        metadata_list.append(geneMetadata["hits"]["hits"][0])
+                else:
+                    metadata_list.append(None)
     return metadata_list
 
 def speciesQuery(searchTerm, pageNumber):
@@ -207,7 +195,7 @@ def specificIsolateQuery(accessionList):
             metadata_list.append(None)
     return metadata_list
 
-def indexAccessions(filename, study_database):
+def indexAccessions(filename):
     """Read csv file posted from frontend and add genomic information to SQL database"""
     accessionDF = pd.read_csv(filename)
     DOI = filename.replace(".csv", "")
@@ -225,22 +213,21 @@ def indexAccessions(filename, study_database):
         elif not row["ENA_run_accession"] == "" or not row["ENA_run_accession"] == " ":
             accession = row["ENA_run_accession"]
             accessions.append(accession)
-    # add accessions to SQLite db
-    sqlite_connection = sqlite3.connect(study_database)
-    sqlite_connection.execute('''CREATE TABLE STUDY_ACCESSIONS
-         (DOI TEXT PRIMARY KEY     NOT NULL,
-          ACCESSIONS           TEXT    NOT NULL);''')
-    db_command = "INSERT INTO STUDY_ACCESSIONS (DOI,ACCESSIONS) \
-                VALUES (" + DOI + ", '" + ",".join(accessions) + "')"
-    sqlite_connection.execute(db_command)
-    sqlite_connection.commit()
-    sqlite_connection.close()
+    with pyodbc.connect('DRIVER='+SQL_DRIVER+';SERVER='+SQL_SERVER+';PORT=1433;DATABASE='+SQL_DB+';UID='+SQL_USERNAME+';PWD='+ SQL_PASSWORD) as conn:
+        with conn.cursor() as cursor:
+            db_command = '''CREATE TABLE STUDY_ACCESSIONS
+                (DOI TEXT PRIMARY KEY   NOT NULL,
+                ACCESSIONS  TEXT    NOT NULL);'''
+            db_command = "INSERT INTO GENE_METADATA (GENE_ID,METADATA) \
+                VALUES (" + str(line) + ", '" + MetadataJSON + "')"
+            cursor.execute(db_command)
 
-def getStudyAccessions(DOI, study_database):
-    sqlite_connection = sqlite3.connect(study_database)
-    db_command = 'SELECT * FROM "STUDY_ACCESSIONS" WHERE "DOI" = ' + DOI + ';'
-    accessionResult = sqlite_connection.execute(db_command)
-    for row in accessionResult:
-        accessions = row[1].split(",")
-    sqlite_connection.close()
+def getStudyAccessions(DOI):
+    with pyodbc.connect('DRIVER='+os.environ.get("SQL_DRIVER")+';SERVER='+os.environ.get("SQL_SERVER")+';PORT=1433;DATABASE='+os.environ.get("SQL_DB")+';UID='+os.environ.get("SQL_USERNAME")+';PWD='+ os.environ.get("SQL_PASSWORD")) as conn:
+        with conn.cursor() as cursor:
+            db_command = 'SELECT * FROM "STUDY_ACCESSIONS" WHERE "DOI" = ' + DOI + ';'
+            cursor.execute(db_command)
+            #row = cursor.fetchone()
+            for row in cursor.fetchall():
+                accessions = row[1].split(",")
     return accessions

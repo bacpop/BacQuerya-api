@@ -18,8 +18,6 @@ from index_query import geneQuery, specificGeneQuery, speciesQuery, isolateQuery
 # data locations
 gene_dir = '/home/bacquerya-usr/' + os.environ.get('GENE_FILES')
 #gene_dir = "gene_test_files"
-gene_database = os.path.join(gene_dir, os.environ.get('GENE_DB'))
-study_database = os.path.join(gene_dir, os.environ.get('STUDY_DB'))
 SECRET_KEY = os.environ.get('FLASK_SECRET_KEY')
 app = Flask(__name__, instance_relative_config=True)
 app.config.update(
@@ -45,9 +43,9 @@ def queryGeneIndex():
         else:
             pageNumber = 0
         if searchType == "gene":
-            searchResult = geneQuery(searchTerm, pageNumber, gene_database)
+            searchResult = geneQuery(searchTerm, pageNumber)
         elif searchType == "consistentNameList":
-            searchResult = specificGeneQuery(searchTerm, gene_database)
+            searchResult = specificGeneQuery(searchTerm)
         return jsonify({"searchResult": searchResult})
 
 @app.route('/isolateQuery', methods=['POST'])
@@ -235,13 +233,13 @@ def uploadAccessions():
     uploaded_file = request.files['file']
     filename = os.path.join(upload_dir, secure_filename(uploaded_file.filename))
     uploaded_file.save(filename)
-    indexAccessions(filename, study_database)
+    indexAccessions(filename)
 
 @app.route('/retrieve_accessions/<DOI>', methods=['POST'])
 @cross_origin()
 def retrieveAccessions(DOI):
     """Retrieve user-uploaded accession IDs for study"""
-    accessions = getStudyAccessions(DOI, study_database)
+    accessions = getStudyAccessions(DOI)
     if not accessions:
         return jsonify({"studyAccessions": accessions})
     else:
