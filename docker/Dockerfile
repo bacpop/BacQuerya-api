@@ -8,7 +8,7 @@ SHELL [ "/bin/bash", "--login", "-c" ]
 ENV DEBIAN_FRONTEND=noninteractive
 
 RUN apt-get update --fix-missing && \
-    apt-get install -y wget bzip2 curl git cmake g++ zlib1g-dev gnupg unixodbc unixodbc-dev && \
+    apt-get install -y wget bzip2 curl git cmake g++ zlib1g-dev gnupg vim && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
@@ -25,6 +25,18 @@ RUN apt-get update \
 COPY docker/sshd_config /etc/ssh
 # Use root password for sudo access
 RUN echo "Defaults rootpw" >> /etc/sudoers
+
+#install ODBC driver for azure sql database access
+RUN curl https://packages.microsoft.com/keys/microsoft.asc | apt-key add -
+RUN curl https://packages.microsoft.com/config/ubuntu/20.04/prod.list > /etc/apt/sources.list.d/mssql-release.list
+RUN apt-get update
+RUN exit
+RUN sudo apt-get update
+RUN sudo ACCEPT_EULA=Y apt-get install -y msodbcsql17
+# optional: for bcp and sqlcmd
+RUN sudo ACCEPT_EULA=Y apt-get install -y mssql-tools
+RUN echo 'export PATH="$PATH:/opt/mssql-tools/bin"' >> ~/.bashrc
+RUN source ~/.bashrc
 
 # Create a non-root user
 ARG username=bacquerya-usr
