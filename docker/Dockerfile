@@ -64,14 +64,10 @@ RUN wget --quiet https://repo.anaconda.com/miniconda/Miniconda3-$MINICONDA_VERSI
 ENV PATH=$CONDA_DIR/bin:$PATH
 
 # install the ODBC driver to query the BacQuerya Azure SQL database
-RUN sudo su \
-    && curl https://packages.microsoft.com/keys/microsoft.asc | apt-key add - \
+ENV ACCEPT_EULA=Y
+RUN curl https://packages.microsoft.com/keys/microsoft.asc | apt-key add - \
     && curl https://packages.microsoft.com/config/ubuntu/20.04/prod.list > /etc/apt/sources.list.d/mssql-release.list \
-    && exit \
-    && sudo apt-get update \
-    && sudo ACCEPT_EULA=Y apt-get install -y msodbcsql17 \
-    && sudo ACCEPT_EULA=Y apt-get install -y mssql-tools \
-    && echo 'export PATH="$PATH:/opt/mssql-tools/bin"' >> ~/.profile
+    && apt-get update && apt-get install -y --no-install-recommends msodbcsql17 mssql-tools
 
 # make conda activate command available from /bin/bash --login shells
 RUN echo ". $CONDA_DIR/etc/profile.d/conda.sh" >> ~/.profile
