@@ -45,7 +45,7 @@ Backend API for the BacQuerya website.
 
 # Testing
 
-To run the flask server locally at (localhost:5000)[localhost:5000] install the dependencies in ```environment.yml``` as well as the [ODBC driver](https://docs.microsoft.com/en-us/sql/connect/odbc/download-odbc-driver-for-sql-server?view=sql-server-ver15) to connect to the Azure SQL database.
+To run the flask server locally at [localhost:5000](localhost:5000) install the dependencies in ```environment.yml``` as well as the [ODBC driver](https://docs.microsoft.com/en-us/sql/connect/odbc/download-odbc-driver-for-sql-server?view=sql-server-ver15) to connect to the Azure SQL database.
 
 # Contributors
 
