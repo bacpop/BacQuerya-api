@@ -8,7 +8,7 @@ SHELL [ "/bin/bash", "--login", "-c" ]
 ENV DEBIAN_FRONTEND=noninteractive
 
 RUN apt-get update --fix-missing && \
-    apt-get install -y wget bzip2 curl git cmake g++ zlib1g-dev && \
+    apt-get install -y wget bzip2 curl git cmake g++ zlib1g-dev gnupg && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
@@ -27,12 +27,12 @@ COPY docker/sshd_config /etc/ssh
 RUN echo "Defaults rootpw" >> /etc/sudoers
 
 # install the ODBC driver to query the BacQuerya Azure SQL database
-RUN apt-get update && apt-get install -y gnupg \
-    && curl https://packages.microsoft.com/keys/microsoft.asc | apt-key add - \
+RUN curl https://packages.microsoft.com/keys/microsoft.asc | apt-key add - \
     && curl https://packages.microsoft.com/config/ubuntu/20.04/prod.list > /etc/apt/sources.list.d/mssql-release.list \
     && exit \
     && apt-get update \
-    && ACCEPT_EULA=Y apt-get install -y msodbcsql17
+    && ACCEPT_EULA=Y apt-get install -y msodbcsql17\
+    && ACCEPT_EULA=Y apt-get install -y mssql-tools
 
 # Create a non-root user
 ARG username=bacquerya-usr
