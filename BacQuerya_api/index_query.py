@@ -32,7 +32,7 @@ def geneQuery(searchTerm, pageNumber):
     geneResult = client.search(index = indexName,
                                body = fetchData,
                                request_timeout = 60)
-    return geneResult
+    return geneResult["hits"]["hits"]
 
 def specificGeneQuery(geneList):
     #### This function is not necessary. We just need to search for a single gene name when loading the gene overview from the URL, not a list of them.
