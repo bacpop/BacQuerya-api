@@ -33,7 +33,11 @@ RUN curl https://packages.microsoft.com/keys/microsoft.asc | apt-key add - \
     && apt-get update \
     && ACCEPT_EULA=Y apt-get install -y msodbcsql17 \
     && ACCEPT_EULA=Y apt-get install -y mssql-tools \
-    && echo 'export PATH="$PATH:/opt/mssql-tools/bin"' >> ~/.profile
+    && apt-get install unixodbc-dev \
+    && echo 'export PATH="$PATH:/opt/mssql-tools/bin"' >> ~/.profile \
+    && echo 'export PATH="$PATH:/opt/mssql-tools/bin"' >> ~/.bash_profile \
+    && echo 'export PATH="$PATH:/opt/mssql-tools/bin"' >> ~/.bashrc \
+    && source ~/.bashrc
 
 # Create a non-root user
 ARG username=bacquerya-usr
