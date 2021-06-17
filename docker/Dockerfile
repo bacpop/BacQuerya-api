@@ -8,7 +8,7 @@ SHELL [ "/bin/bash", "--login", "-c" ]
 ENV DEBIAN_FRONTEND=noninteractive
 
 RUN apt-get update --fix-missing && \
-    apt-get install -y wget bzip2 curl git cmake g++ zlib1g-dev gnupg && \
+    apt-get install -y wget bzip2 curl git cmake g++ zlib1g-dev gnupg unixodbc unixodbc-dev && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
@@ -62,12 +62,6 @@ RUN wget --quiet https://repo.anaconda.com/miniconda/Miniconda3-$MINICONDA_VERSI
 
 # make non-activate conda commands available
 ENV PATH=$CONDA_DIR/bin:$PATH
-
-# install the ODBC driver to query the BacQuerya Azure SQL database
-ENV ACCEPT_EULA=Y
-RUN curl https://packages.microsoft.com/keys/microsoft.asc | apt-key add - \
-    && curl https://packages.microsoft.com/config/ubuntu/20.04/prod.list > /etc/apt/sources.list.d/mssql-release.list \
-    && apt-get update && apt-get install -y --no-install-recommends msodbcsql17 mssql-tools
 
 # make conda activate command available from /bin/bash --login shells
 RUN echo ". $CONDA_DIR/etc/profile.d/conda.sh" >> ~/.profile
