@@ -64,7 +64,8 @@ RUN wget --quiet https://repo.anaconda.com/miniconda/Miniconda3-$MINICONDA_VERSI
 ENV PATH=$CONDA_DIR/bin:$PATH
 
 # install the ODBC driver to query the BacQuerya Azure SQL database
-RUN curl https://packages.microsoft.com/keys/microsoft.asc | apt-key add - \
+RUN sudo su \
+    && curl https://packages.microsoft.com/keys/microsoft.asc | apt-key add - \
     && curl https://packages.microsoft.com/config/ubuntu/20.04/prod.list > /etc/apt/sources.list.d/mssql-release.list \
     && exit \
     && apt-get update \
