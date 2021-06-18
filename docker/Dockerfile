@@ -33,7 +33,6 @@ RUN apt-get update
 RUN exit
 RUN sudo apt-get update
 RUN sudo ACCEPT_EULA=Y apt-get install -y msodbcsql17
-# optional: for bcp and sqlcmd
 RUN sudo ACCEPT_EULA=Y apt-get install -y mssql-tools
 
 # Create a non-root user
