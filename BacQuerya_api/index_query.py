@@ -44,19 +44,19 @@ def specificGeneQuery(geneList):
     metadata_list = []
     client = Elasticsearch([searchURL],
                            api_key=(apiID, apiKEY))
-    for geneName in geneList:
-        fetchData = {"size": 10,
-                        "query" : {
-                            "match": {
-                                "consistentNames": geneName
+    with pyodbc.connect('DRIVER='+os.environ.get("SQL_DRIVER")+';SERVER='+os.environ.get("SQL_SERVER")+';PORT=1433;DATABASE='+os.environ.get("SQL_DB")+';UID='+os.environ.get("SQL_USERNAME")+';PWD='+ os.environ.get("SQL_PASSWORD")) as conn:
+        with conn.cursor() as cursor:
+            for geneName in geneList:
+                fetchData = {"size": 10,
+                                "query" : {
+                                    "match": {
+                                        "consistentNames": geneName
+                                        }
+                                    }
                                 }
-                            }
-                        }
-        geneMetadata = client.search(index = indexName,
-                                     body = fetchData,
-                                     request_timeout = 60)
-        with pyodbc.connect('DRIVER='+os.environ.get("SQL_DRIVER")+';SERVER='+os.environ.get("SQL_SERVER")+';PORT=1433;DATABASE='+os.environ.get("SQL_DB")+';UID='+os.environ.get("SQL_USERNAME")+';PWD='+ os.environ.get("SQL_PASSWORD")) as conn:
-            with conn.cursor() as cursor:
+                geneMetadata = client.search(index = indexName,
+                                            body = fetchData,
+                                            request_timeout = 60)
                 if not len(geneMetadata["hits"]["hits"]) == 0:
                     db_command = 'SELECT * FROM "GENE_METADATA" WHERE "GENE_ID" = ' + str(geneMetadata["hits"]["hits"][0]["_source"]["gene_index"]) + ';'
                     cursor.execute(db_command)
