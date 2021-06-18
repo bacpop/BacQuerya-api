@@ -224,7 +224,7 @@ def indexAccessions(filename):
             db_command = '''CREATE TABLE STUDY_ACCESSIONS
                 (DOI TEXT PRIMARY KEY   NOT NULL,
                 ACCESSIONS  TEXT    NOT NULL);'''
-            db_command = "INSERT INTO GENE_METADATA (GENE_ID,METADATA) \
+            db_command = "INSERT INTO STUDY_ACCESSIONS (DOI,ACCESSIONS) \
                 VALUES (" + str(line) + ", '" + MetadataJSON + "')"
             cursor.execute(db_command)
 
