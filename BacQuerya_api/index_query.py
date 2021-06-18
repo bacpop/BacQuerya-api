@@ -44,7 +44,7 @@ def specificGeneQuery(geneList):
     metadata_list = []
     client = Elasticsearch([searchURL],
                            api_key=(apiID, apiKEY))
-    with pyodbc.connect('DRIVER='+os.environ.get("SQL_DRIVER")+';SERVER='+os.environ.get("SQL_SERVER")+';PORT=1433;DATABASE='+os.environ.get("SQL_DB")+';UID='+os.environ.get("SQL_USERNAME")+';PWD='+ os.environ.get("SQL_PASSWORD")) as conn:
+    with pyodbc.connect('DRIVER='+os.environ.get("SQL_DRIVER")+';SERVER='+os.environ.get("SQL_SERVER")+';DATABASE='+os.environ.get("SQL_DB")+';UID='+os.environ.get("SQL_USERNAME")+';PWD='+ os.environ.get("SQL_PASSWORD")) as conn:
         with conn.cursor() as cursor:
             for geneName in geneList:
                 fetchData = {"size": 10,
