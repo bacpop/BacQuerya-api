@@ -29,7 +29,6 @@ RUN echo "Defaults rootpw" >> /etc/sudoers
 #install ODBC driver for azure sql database access
 RUN curl https://packages.microsoft.com/keys/microsoft.asc | apt-key add -
 RUN curl https://packages.microsoft.com/config/ubuntu/20.04/prod.list > /etc/apt/sources.list.d/mssql-release.list
-RUN apt-get update
 RUN exit
 RUN sudo apt-get update
 RUN sudo ACCEPT_EULA=Y apt-get install -y msodbcsql17
