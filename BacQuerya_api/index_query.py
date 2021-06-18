@@ -219,7 +219,7 @@ def indexAccessions(filename):
         elif not row["ENA_run_accession"] == "" or not row["ENA_run_accession"] == " ":
             accession = row["ENA_run_accession"]
             accessions.append(accession)
-    with pyodbc.connect('DRIVER='+SQL_DRIVER+';SERVER='+SQL_SERVER+';PORT=1433;DATABASE='+SQL_DB+';UID='+SQL_USERNAME+';PWD='+ SQL_PASSWORD) as conn:
+    with pyodbc.connect(os.environ.get("SQL_CONNECTION_STRING")) as conn:
         with conn.cursor() as cursor:
             db_command = '''CREATE TABLE STUDY_ACCESSIONS
                 (DOI TEXT PRIMARY KEY   NOT NULL,
@@ -229,7 +229,7 @@ def indexAccessions(filename):
             cursor.execute(db_command)
 
 def getStudyAccessions(DOI):
-    with pyodbc.connect('DRIVER='+os.environ.get("SQL_DRIVER")+';SERVER='+os.environ.get("SQL_SERVER")+';PORT=1433;DATABASE='+os.environ.get("SQL_DB")+';UID='+os.environ.get("SQL_USERNAME")+';PWD='+ os.environ.get("SQL_PASSWORD")) as conn:
+    with pyodbc.connect(os.environ.get("SQL_CONNECTION_STRING")) as conn:
         with conn.cursor() as cursor:
             db_command = 'SELECT * FROM "STUDY_ACCESSIONS" WHERE "DOI" = ' + DOI + ';'
             cursor.execute(db_command)
