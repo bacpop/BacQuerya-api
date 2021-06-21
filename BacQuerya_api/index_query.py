@@ -192,10 +192,11 @@ def specificIsolateQuery(accessionList):
                                                 body = fetchData,
                                                 request_timeout = 60)
                 if not len(isolateMetadata["hits"]["hits"]) == 0:
-                    db_command = 'SELECT * FROM "ISOLATE_METADATA" WHERE "ISOLATE_ID" = ' + str(isolateMetadata["hits"]["hits"][0]["_source"]["isolate_index"]) + ';'
-                    cursor.execute(db_command)
-                    for line in cursor.fetchall():
-                        isolateMetadata["hits"]["hits"][0]["_source"].update({"isolateMetadata": line[1]})
+                    #db_command = 'SELECT * FROM "ISOLATE_METADATA" WHERE "ISOLATE_ID" = ' + str(isolateMetadata["hits"]["hits"][0]["_source"]["isolate_index"]) + ';'
+                    #cursor.execute(db_command)
+                    #for line in cursor.fetchall():
+                        #isolateMetadata["hits"]["hits"][0]["_source"].update({"isolateMetadata": line[1]})
+                        #metadata_list.append(isolateMetadata["hits"]["hits"][0])
                         metadata_list.append(isolateMetadata["hits"]["hits"][0])
                 else:
                     metadata_list.append(None)
