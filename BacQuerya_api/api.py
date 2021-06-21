@@ -213,7 +213,7 @@ def alignementViewer(consistentName):
     for line in tqdm(alignment):
         split = line.splitlines()
         title = split[0]
-        sequence = split[1]
+        sequence = "".join(split[1:])
         alignmentJSON[title] = sequence.upper()
     return jsonify(alignmentJSON)
 
