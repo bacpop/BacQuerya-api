@@ -197,7 +197,7 @@ def specificIsolateQuery(accessionList):
                     #for line in cursor.fetchall():
                         #isolateMetadata["hits"]["hits"][0]["_source"].update({"isolateMetadata": line[1]})
                         #metadata_list.append(isolateMetadata["hits"]["hits"][0])
-                        metadata_list.append(isolateMetadata["hits"]["hits"][0])
+                    metadata_list.append(isolateMetadata["hits"]["hits"][0])
                 else:
                     metadata_list.append(None)
     return metadata_list
