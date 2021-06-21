@@ -226,7 +226,7 @@ def indexAccessions(filename):
                 (DOI TEXT PRIMARY KEY   NOT NULL,
                 ACCESSIONS  TEXT    NOT NULL);'''
             db_command = "INSERT INTO STUDY_ACCESSIONS (DOI,ACCESSIONS) \
-                VALUES (" + str(line) + ", '" + MetadataJSON + "')"
+                VALUES (" + DOI + ", '" + ",".join(accessions) + "')"
             cursor.execute(db_command)
 
 def getStudyAccessions(DOI):
