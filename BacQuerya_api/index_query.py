@@ -13,6 +13,7 @@ def geneQuery(searchTerm, pageNumber):
     indexName = os.environ.get("ELASTIC_GENE_NAME")
     numResults = 100
     fetchData = {"size": numResults,
+                "track_total_hits": True,
                 "from": numResults * pageNumber,
                 "query" : {
                     "multi_match" : {
@@ -32,7 +33,7 @@ def geneQuery(searchTerm, pageNumber):
     geneResult = client.search(index = indexName,
                                body = fetchData,
                                request_timeout = 60)
-    return geneResult["hits"]["hits"]
+    return geneResult["hits"]["hits"], geneResult["hits"]["total"]["value"]
 
 def specificGeneQuery(geneList):
     #### This function is not necessary. We just need to search for a single gene name when loading the gene overview from the URL, not a list of them.
@@ -127,6 +128,7 @@ def isolateQuery(searchTerm, searchFilters, pageNumber):
     filterList = getFilters(searchFilters)
     numResults = 100
     fetchData = {"size": numResults,
+                "track_total_hits": True,
                 "from": numResults * pageNumber,
                 "sort" : [
                     {"rankScore" : {"order" : "desc"}}
@@ -162,8 +164,7 @@ def isolateQuery(searchTerm, searchFilters, pageNumber):
     isolateResult = client.search(index = indexName,
                                   body = fetchData,
                                   request_timeout = 60)
-
-    return isolateResult["hits"]["hits"]
+    return isolateResult["hits"]["hits"], isolateResult["hits"]["total"]["value"]
 
 def specificIsolateQuery(accessionList):
     """Iterate through list of isolate biosample accessions and get metadata"""
