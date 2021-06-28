@@ -38,11 +38,8 @@ def queryGeneIndex():
         searchDict = request.json
         searchTerm = searchDict["searchTerm"]
         searchType = searchDict["searchType"]
-        if "pageNumber" in searchDict.keys():
-            pageNumber = int(searchDict["pageNumber"]) - 1
-        else:
-            pageNumber = 0
         if searchType == "gene":
+            pageNumber = int(searchDict["pageNumber"]) - 1
             searchResult, searchCount = geneQuery(searchTerm, pageNumber)
             return jsonify({"searchResult": searchResult, "resultCount": searchCount})
         elif searchType == "consistentNameList":
@@ -59,14 +56,12 @@ def queryIsolateIndex():
         searchDict = request.json
         searchTerm = searchDict["searchTerm"]
         searchType = searchDict["searchType"]
-        if "pageNumber" in searchDict.keys():
-            pageNumber = int(searchDict["pageNumber"]) - 1
-        else:
-            pageNumber = 0
         if searchType == "species":
+            pageNumber = int(searchDict["pageNumber"]) - 1
             searchResult = speciesQuery(searchTerm, pageNumber)
         elif searchType == "isolate":
             searchFilters = searchDict["searchFilters"]
+            pageNumber = int(searchDict["pageNumber"]) - 1
             searchResult, searchCount = isolateQuery(searchTerm, searchFilters, pageNumber)
             return jsonify({"searchResult": searchResult, "resultCount": searchCount})
         elif searchType == "biosampleList":
