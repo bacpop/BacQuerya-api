@@ -131,6 +131,7 @@ def isolateQuery(searchTerm, searchFilters, pageNumber):
                 "track_total_hits": True,
                 "from": numResults * pageNumber,
                 "sort" : [
+                    {"_score": {"order": "desc"}},
                     {"rankScore" : {"order" : "desc"}}
                 ],
                 "query": {
