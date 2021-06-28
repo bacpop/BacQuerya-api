@@ -1,3 +1,4 @@
+import datetime
 from elasticsearch import Elasticsearch
 import json
 import os
@@ -109,14 +110,15 @@ def getFilters(searchFilters):
     if not searchFilters["Country"].replace(" ", "") == "All":
         # elastic indexes all terms as lowercase, even though this is not returned with the results
         filterList.append({"term": {"Country": searchFilters["Country"].lower()}})
-    if not searchFilters["Year"] == "Start-End":
+    if not searchFilters["Year"] == [1950, datetime.datetime.now().year]:
         years = searchFilters["Year"]
-        if (years[1] == "" or years[1] == "End") and not (years[0] == "" or years[0] == "Start"):
+        if (years[1] == "" or years[1] == datetime.datetime.now().year) and not (years[0] == "" or years[0] == 1950):
             filterList.append({"range": {"Year": {"gte": int(years[0])}}})
-        if (years[0] == "" or years[0] == "Start") and not (years[1] == "" or years[1] == "End"):
+        if (years[0] == "" or years[0] == 1950) and not (years[1] == "" or years[1] == datetime.datetime.now().year):
             filterList.append({"range": {"Year": {"lte": int(years[1])}}})
-        if not (years[0] == "" or years[0] == "Start") and not (years[1] == "" or years[1] == "End"):
+        if not (years[0] == "" or years[0] == 1950) and not (years[1] == "" or years[1] == datetime.datetime.now().year):
             filterList.append({"range": {"Year": {"gte": int(years[0]), "lte": int(years[1])}}})
+    print(filterList)
     return filterList
 
 def isolateQuery(searchTerm, searchFilters, pageNumber):
