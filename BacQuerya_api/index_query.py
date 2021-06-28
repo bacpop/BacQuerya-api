@@ -146,6 +146,9 @@ def isolateQuery(searchTerm, searchFilters, pageNumber):
                                 "GenBank_assembly_accession",
                                 "RefSeq_assembly_and_GenBank_assemblies_identical",
                                 "BioSample",
+                                "read_accession",
+                                "run_accession",
+                                "Taxid",
                                 "Organism_name",
                                 "In_Silico_Serotype",
                                 "Country"
