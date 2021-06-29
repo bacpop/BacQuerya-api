@@ -65,7 +65,7 @@ def specificGeneQuery(geneList):
                     cursor.execute(db_command)
                     #row = cursor.fetchone()
                     for line in cursor.fetchall():
-                        geneMetadata["hits"]["hits"][0]["_source"].update({"geneMetadata": line[1]})
+                        geneMetadata["hits"]["hits"][0]["_source"].update({"geneMetadata": json.loads(line[1])})
                         metadata_list.append(geneMetadata["hits"]["hits"][0])
                 else:
                     metadata_list.append(None)
