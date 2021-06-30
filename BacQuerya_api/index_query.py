@@ -179,32 +179,41 @@ def specificIsolateQuery(accessionList):
     metadata_list = []
     client = Elasticsearch([searchURL],
                            api_key=(apiID, apiKEY))
-    with pyodbc.connect(os.environ.get("SQL_CONNECTION_STRING")) as conn:
-        with conn.cursor() as cursor:
-            for accession in accessionList:
-                fetchData = {"size": 10,
-                            "query": {
-                                "bool": {
-                                    "must": [{
-                                        "match": {
-                                            "BioSample": accession
-                                        }
-                                }
-                            ]}
-                        }
-                        }
-                isolateMetadata = client.search(index = indexName,
-                                                body = fetchData,
-                                                request_timeout = 60)
-                if not len(isolateMetadata["hits"]["hits"]) == 0:
-                    db_command = 'SELECT * FROM "ISOLATE_METADATA" WHERE "ISOLATE_ID" = ' + str(isolateMetadata["hits"]["hits"][0]["_source"]["isolate_index"]) + ';'
-                    cursor.execute(db_command)
-                    for line in cursor.fetchall():
-                        isolateMetadata["hits"]["hits"][0]["_source"].update(json.loads(line[1]))
-                        metadata_list.append(isolateMetadata["hits"]["hits"][0])
+    for i in range(3):
+        try:
+            conn = pyodbc.connect(os.environ.get("SQL_CONNECTION_STRING"), timeout=5)
+        except:
+            if i < 3 - 1:
+                continue
+            else:
+                return None
+        break
+    with conn.cursor() as cursor:
+        for accession in accessionList:
+            fetchData = {"size": 10,
+                        "query": {
+                            "bool": {
+                                "must": [{
+                                    "match": {
+                                        "BioSample": accession
+                                    }
+                            }
+                        ]}
+                    }
+                    }
+            isolateMetadata = client.search(index = indexName,
+                                            body = fetchData,
+                                            request_timeout = 60)
+            if not len(isolateMetadata["hits"]["hits"]) == 0:
+                db_command = 'SELECT * FROM "ISOLATE_METADATA" WHERE "ISOLATE_ID" = ' + str(isolateMetadata["hits"]["hits"][0]["_source"]["isolate_index"]) + ';'
+                cursor.execute(db_command)
+                for line in cursor.fetchall():
+                    isolateMetadata["hits"]["hits"][0]["_source"].update(json.loads(line[1]))
                     metadata_list.append(isolateMetadata["hits"]["hits"][0])
-                else:
-                    metadata_list.append(None)
+                metadata_list.append(isolateMetadata["hits"]["hits"][0])
+            else:
+                metadata_list.append(None)
+    conn.close()
     return metadata_list
 
 def indexAccessions(filename):
