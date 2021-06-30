@@ -47,28 +47,37 @@ def specificGeneQuery(geneList):
     metadata_list = []
     client = Elasticsearch([searchURL],
                            api_key=(apiID, apiKEY))
-    with pyodbc.connect(os.environ.get("SQL_CONNECTION_STRING")) as conn:
-        with conn.cursor() as cursor:
-            for geneName in geneList:
-                fetchData = {"size": 10,
-                                "query" : {
-                                    "match": {
-                                        "consistentNames": geneName
-                                        }
+    for i in range(3):
+        try:
+            conn = pyodbc.connect(os.environ.get("SQL_CONNECTION_STRING"), timeout=5)
+        except:
+            if i < 3 - 1:
+                continue
+            else:
+                return None
+        break
+    with conn.cursor() as cursor:
+        for geneName in geneList:
+            fetchData = {"size": 10,
+                            "query" : {
+                                "match": {
+                                    "consistentNames": geneName
                                     }
                                 }
-                geneMetadata = client.search(index = indexName,
-                                            body = fetchData,
-                                            request_timeout = 60)
-                if not len(geneMetadata["hits"]["hits"]) == 0:
-                    db_command = 'SELECT * FROM "GENE_METADATA" WHERE "GENE_ID" = ' + str(geneMetadata["hits"]["hits"][0]["_source"]["gene_index"]) + ';'
-                    cursor.execute(db_command)
-                    #row = cursor.fetchone()
-                    for line in cursor.fetchall():
-                        geneMetadata["hits"]["hits"][0]["_source"].update({"geneMetadata": json.loads(line[1])})
-                        metadata_list.append(geneMetadata["hits"]["hits"][0])
-                else:
-                    metadata_list.append(None)
+                            }
+            geneMetadata = client.search(index = indexName,
+                                        body = fetchData,
+                                        request_timeout = 60)
+            if not len(geneMetadata["hits"]["hits"]) == 0:
+                db_command = 'SELECT * FROM "GENE_METADATA" WHERE "GENE_ID" = ' + str(geneMetadata["hits"]["hits"][0]["_source"]["gene_index"]) + ';'
+                cursor.execute(db_command)
+                #row = cursor.fetchone()
+                for line in cursor.fetchall():
+                    geneMetadata["hits"]["hits"][0]["_source"].update({"geneMetadata": json.loads(line[1])})
+                    metadata_list.append(geneMetadata["hits"]["hits"][0])
+            else:
+                metadata_list.append(None)
+    conn.close()
     return metadata_list
 
 def speciesQuery(searchTerm, pageNumber):
