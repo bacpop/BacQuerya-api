@@ -282,7 +282,7 @@ def indexAccessions(filename):
                                         body = fetchData,
                                         request_timeout = 60)
         if not len(isolateResult["hits"]["hits"]) == 0:
-            bio = isolateResult["hits"]["hits"][0]["BioSample"]
+            bio = isolateResult["hits"]["hits"][0]["_source"]["BioSample"]
             biosamples.append(bio)
     with pyodbc.connect(os.environ.get("SQL_CONNECTION_STRING")) as conn:
         with conn.cursor() as cursor:
