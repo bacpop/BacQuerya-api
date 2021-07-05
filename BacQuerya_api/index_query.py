@@ -117,9 +117,9 @@ def getFilters(searchFilters):
     if not searchFilters["Country"].replace(" ", "") == "All":
         # elastic indexes all terms as lowercase, even though this is not returned with the results
         filterList.append({"term": {"Country": searchFilters["Country"].lower()}})
+    searchFilters["Year"] = [str(year) for year in searchFilters["Year"]]
     if not searchFilters["Year"] == ["1985", str(datetime.datetime.now().year)]:
-        years = [str(year) for year in searchFilters["Year"]]
-        if (years[1] == "" or years[1] == datetime.datetime.now().year) and not (years[0] == "" or years[0] == "1985"):
+        if (years[1] == "" or years[1] == str(datetime.datetime.now().year)) and not (years[0] == "" or years[0] == "1985"):
             filterList.append({"range": {"Year": {"gte": int(years[0])}}})
         if (years[0] == "" or years[0] == "1985") and not (years[1] == "" or years[1] == datetime.datetime.now().year):
             filterList.append({"range": {"Year": {"lte": int(years[1])}}})
@@ -172,6 +172,7 @@ def isolateQuery(searchTerm, searchFilters, pageNumber):
         }
     if not filterList == []:
         fetchData["query"]["bool"]["filter"] = filterList
+        print(filterList)
     client = Elasticsearch([searchURL],
                            api_key=(apiID, apiKEY))
     isolateResult = client.search(index = indexName,
