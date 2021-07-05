@@ -242,7 +242,7 @@ def uploadAccessions():
 def retrieveAccessions(DOI):
     """Retrieve user-uploaded accession IDs for study"""
     accessions = getStudyAccessions(DOI)
-    if not accessions:
+    if accessions:
         return jsonify({"studyAccessions": accessions})
     else:
         return jsonify({"studyAccessions": []})

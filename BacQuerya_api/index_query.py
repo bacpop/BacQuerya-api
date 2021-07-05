@@ -243,13 +243,54 @@ def indexAccessions(filename):
         elif not row["ENA_run_accession"] == "" or not row["ENA_run_accession"] == " ":
             accession = row["ENA_run_accession"]
             accessions.append(accession)
+    biosamples = []
+    searchURL = os.environ.get("ELASTIC_API_URL")
+    apiID = os.environ.get("ELASTIC_ISOLATE_API_ID")
+    apiKEY = os.environ.get("ELASTIC_ISOLATE_API_KEY")
+    indexName = os.environ.get("ELASTIC_ISOLATE_NAME")
+    for access in accessions:
+        # apply filters to the elasitcsearch output
+        numResults = 10
+        fetchData = {"size": numResults,
+                    "track_total_hits": True,
+                    "query": {
+                        "bool": {
+                            "must" : {
+                                "multi_match" : {
+                                "query": access,
+                                "fields" : [
+                                    "isolateName",
+                                    "isolateNameUnderscore",
+                                    "Assembly_name",
+                                    "Infraspecific_name",
+                                    "GenBank_assembly_accession",
+                                    "RefSeq_assembly_and_GenBank_assemblies_identical",
+                                    "BioSample",
+                                    "read_accession",
+                                    "run_accession",
+                                ],
+                                "operator": "or",
+                                "fuzziness": "AUTO",
+                            }
+                        }
+                    }
+                }
+            }
+        client = Elasticsearch([searchURL],
+                                api_key=(apiID, apiKEY))
+        isolateResult = client.search(index = indexName,
+                                        body = fetchData,
+                                        request_timeout = 60)
+        if not len(isolateResult["hits"]["hits"]) == 0:
+            bio = isolateResult["hits"]["hits"][0]["BioSample"]
+            biosamples.append(bio)
     with pyodbc.connect(os.environ.get("SQL_CONNECTION_STRING")) as conn:
         with conn.cursor() as cursor:
             db_command = '''CREATE TABLE STUDY_ACCESSIONS
                 (DOI TEXT PRIMARY KEY   NOT NULL,
                 ACCESSIONS  TEXT    NOT NULL);'''
             db_command = "INSERT INTO STUDY_ACCESSIONS (DOI,ACCESSIONS) \
-                VALUES (" + DOI + ", '" + ",".join(accessions) + "')"
+                VALUES (" + DOI + ", '" + ",".join(biosamples) + "')"
             cursor.execute(db_command)
 
 def getStudyAccessions(DOI):
@@ -258,6 +299,9 @@ def getStudyAccessions(DOI):
             db_command = 'SELECT * FROM "STUDY_ACCESSIONS" WHERE "DOI" = ' + DOI + ';'
             cursor.execute(db_command)
             #row = cursor.fetchone()
-            for row in cursor.fetchall():
-                accessions = row[1].split(",")
-    return accessions
+            try:
+                for row in cursor.fetchall():
+                    accessions = row[1].split(",")
+                    return accessions
+            except:
+                return False
