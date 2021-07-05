@@ -119,12 +119,12 @@ def getFilters(searchFilters):
         filterList.append({"term": {"Country": searchFilters["Country"].lower()}})
     searchFilters["Year"] = [str(year) for year in searchFilters["Year"]]
     if not searchFilters["Year"] == ["1985", str(datetime.datetime.now().year)]:
-        if (years[1] == "" or years[1] == str(datetime.datetime.now().year)) and not (years[0] == "" or years[0] == "1985"):
-            filterList.append({"range": {"Year": {"gte": int(years[0])}}})
-        if (years[0] == "" or years[0] == "1985") and not (years[1] == "" or years[1] == datetime.datetime.now().year):
-            filterList.append({"range": {"Year": {"lte": int(years[1])}}})
-        if not (years[0] == "" or years[0] == "1985") and not (years[1] == "" or years[1] == datetime.datetime.now().year):
-            filterList.append({"range": {"Year": {"gte": int(years[0]), "lte": int(years[1])}}})
+        if (searchFilters["Year"][1] == "" or searchFilters["Year"][1] == str(datetime.datetime.now().year)) and not (searchFilters["Year"][0] == "" or searchFilters["Year"][0] == "1985"):
+            filterList.append({"range": {"Year": {"gte": int(searchFilters["Year"][0])}}})
+        if (searchFilters["Year"][0] == "" or searchFilters["Year"][0] == "1985") and not (searchFilters["Year"][1] == "" or searchFilters["Year"][1] == datetime.datetime.now().year):
+            filterList.append({"range": {"Year": {"lte": int(searchFilters["Year"][1])}}})
+        if not (searchFilters["Year"][0] == "" or searchFilters["Year"][0] == "1985") and not (searchFilters["Year"][1] == "" or searchFilters["Year"][1] == datetime.datetime.now().year):
+            filterList.append({"range": {"Year": {"gte": int(searchFilters["Year"][0]), "lte": int(searchFilters["Year"][1])}}})
     return filterList
 
 def isolateQuery(searchTerm, searchFilters, pageNumber):
