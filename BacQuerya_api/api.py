@@ -1,4 +1,4 @@
-import cobs_index as cobs
+#import cobs_index as cobs
 from flask import Flask, request, jsonify, send_file, url_for, render_template
 from flask_cors import CORS, cross_origin
 from itsdangerous import TimedJSONWebSignatureSerializer as Serializer
@@ -16,8 +16,8 @@ from bulk_download import getDownloadLink, send_email
 from index_query import geneQuery, specificGeneQuery, speciesQuery, isolateQuery, specificIsolateQuery, indexAccessions, getStudyAccessions
 
 # data locations
-gene_dir = '/home/bacquerya-usr/' + os.environ.get('GENE_FILES')
-#gene_dir = "gene_test_files"
+#gene_dir = '/home/bacquerya-usr/' + os.environ.get('GENE_FILES')
+gene_dir = "gene_test_files"
 SECRET_KEY = os.environ.get('FLASK_SECRET_KEY')
 app = Flask(__name__, instance_relative_config=True)
 app.config.update(
@@ -247,12 +247,16 @@ def retrieveAccessions(DOI):
     else:
         return jsonify({"studyAccessions": []})
 
-@app.route('/population_assembly_stats', methods=['GET'])
+@app.route('/population_assembly_stats/<species>', methods=['GET'])
 @cross_origin()
-def populationStats():
+def populationStats(species):
     """Send population assembly stats JSON file to frontend"""
-    with open(os.path.join(gene_dir, "population_assembly_stats.json")) as statsFile:
-        assemblyStats = json.loads(statsFile.read())
+    if species == "Streptococcus_pneumoniae":
+        with open(os.path.join(gene_dir, "SP_population_assembly_stats.json")) as statsFile:
+            assemblyStats = json.loads(statsFile.read())
+    if species == "Escherichia_coli":
+        with open(os.path.join(gene_dir, "ESC_population_assembly_stats.json")) as statsFile:
+            assemblyStats = json.loads(statsFile.read())
     return jsonify(assemblyStats)
 
 if __name__ == "__main__":
