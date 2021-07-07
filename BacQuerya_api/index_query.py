@@ -161,9 +161,7 @@ def isolateQuery(searchTerm, searchFilters, pageNumber):
                                 "Taxid",
                                 "Organism_name",
                                 "In_Silico_Serotype",
-                                "Country",
-                                "ERR",
-                                "ERS"
+                                "Country"
                             ],
                             "operator": "or",
                             "fuzziness": "AUTO",
