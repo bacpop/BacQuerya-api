@@ -13,7 +13,7 @@ from werkzeug.utils import secure_filename
 
 from study_search import search_pubmed
 from bulk_download import getDownloadLink, send_email
-from index_query import geneQuery, specificGeneQuery, speciesQuery, isolateQuery, specificIsolateQuery, indexAccessions, getStudyAccessions
+from index_query import geneQuery, specificGeneQuery, isolateQuery, specificIsolateQuery, indexAccessions, getStudyAccessions
 
 # data locations
 gene_dir = '/home/bacquerya-usr/' + os.environ.get('GENE_FILES')
@@ -63,9 +63,7 @@ def queryIsolateIndex():
             pageNumber = int(searchDict["pageNumber"]) - 1
         else:
             pageNumber = 0
-        if searchType == "species":
-            searchResult = speciesQuery(searchTerm, pageNumber)
-        elif searchType == "isolate":
+        if searchType == "isolate":
             searchFilters = searchDict["searchFilters"]
             searchResult, searchCount = isolateQuery(searchTerm, searchFilters, pageNumber)
             return jsonify({"searchResult": searchResult, "resultCount": searchCount})
