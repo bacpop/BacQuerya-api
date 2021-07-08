@@ -80,28 +80,6 @@ def specificGeneQuery(geneList):
     conn.close()
     return metadata_list
 
-def speciesQuery(searchTerm, pageNumber):
-    """Get all species results in elastic isolate index"""
-    searchURL = os.environ.get("ELASTIC_API_URL")
-    apiID = os.environ.get("ELASTIC_ISOLATE_API_ID")
-    apiKEY = os.environ.get("ELASTIC_ISOLATE_API_KEY")
-    indexName = os.environ.get("ELASTIC_ISOLATE_NAME")
-    numResults = 100
-    fetchData = {"size": numResults,
-                "from": numResults * pageNumber,
-                    "query" : {
-                        "match" : {
-                            "Organism_name" : searchTerm
-                            }
-                    }
-                }
-    client = Elasticsearch([searchURL],
-                           api_key=(apiID, apiKEY))
-    speciesResult = client.search(index = indexName,
-                                  body = fetchData,
-                                  request_timeout = 60)
-    return speciesResult["hits"]["hits"]
-
 def getFilters(searchFilters):
     filterList  = []
     if searchFilters["assemblies"] and not searchFilters["reads"]:
@@ -133,6 +111,13 @@ def isolateQuery(searchTerm, searchFilters, pageNumber):
     apiID = os.environ.get("ELASTIC_ISOLATE_API_ID")
     apiKEY = os.environ.get("ELASTIC_ISOLATE_API_KEY")
     indexName = os.environ.get("ELASTIC_ISOLATE_NAME")
+    # return only exact or fuzzy matches
+    if searchFilters["exactMatches"]:
+        fuzziness = 0
+        operator = "and"
+    else:
+        fuzziness = "AUTO"
+        operator = "or"
     # apply filters to the elasitcsearch output
     filterList = getFilters(searchFilters)
     numResults = 100
@@ -165,8 +150,8 @@ def isolateQuery(searchTerm, searchFilters, pageNumber):
                                 "ERR",
                                 "ERS"
                             ],
-                            "operator": "or",
-                            "fuzziness": "AUTO",
+                            "operator": operator,
+                            "fuzziness": fuzziness,
                         }
                     }
                 }

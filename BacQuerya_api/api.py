@@ -13,7 +13,7 @@ from werkzeug.utils import secure_filename
 
 from study_search import search_pubmed
 from bulk_download import getDownloadLink, send_email
-from index_query import geneQuery, specificGeneQuery, speciesQuery, isolateQuery, specificIsolateQuery, indexAccessions, getStudyAccessions
+from index_query import geneQuery, specificGeneQuery, isolateQuery, specificIsolateQuery, indexAccessions, getStudyAccessions
 
 # data locations
 gene_dir = '/home/bacquerya-usr/' + os.environ.get('GENE_FILES')
@@ -63,9 +63,7 @@ def queryIsolateIndex():
             pageNumber = int(searchDict["pageNumber"]) - 1
         else:
             pageNumber = 0
-        if searchType == "species":
-            searchResult = speciesQuery(searchTerm, pageNumber)
-        elif searchType == "isolate":
+        if searchType == "isolate":
             searchFilters = searchDict["searchFilters"]
             searchResult, searchCount = isolateQuery(searchTerm, searchFilters, pageNumber)
             return jsonify({"searchResult": searchResult, "resultCount": searchCount})
@@ -200,24 +198,30 @@ def download_link(token):
 @cross_origin()
 def alignementDownload(consistentName):
     """Send MSA for requested gene"""
-    return send_file(os.path.join("..", gene_dir, "alignments", consistentName + ".aln.fas"), as_attachment=True)
+    if os.path.exists(os.path.join(gene_dir, "alignments", consistentName + ".aln.fas")):
+        return send_file(os.path.join("..", gene_dir, "alignments", consistentName + ".aln.fas"), as_attachment=True)
+    else:
+        return None
 
 @app.route('/alignmentView/<consistentName>', methods=['GET', 'POST'])
 @cross_origin()
 def alignementViewer(consistentName):
     """Send MSA in JSON format for requested gene"""
     consistentName = consistentName + ".aln.fas"
-    with open(os.path.join(gene_dir, "alignments", consistentName)) as alnFile:
-        alignment = alnFile.read()
-    alignment = alignment.split(">")[1:]
-    sys.stderr.write("\nConverting MSA to JSON\n")
-    alignmentJSON = {}
-    for line in tqdm(alignment):
-        split = line.splitlines()
-        title = split[0]
-        sequence = "".join(split[1:])
-        alignmentJSON[title] = sequence.upper()
-    return jsonify(alignmentJSON)
+    if os.path.exists(os.path.join(gene_dir, "alignments", consistentName)):
+        with open(os.path.join(gene_dir, "alignments", consistentName)) as alnFile:
+            alignment = alnFile.read()
+        alignment = alignment.split(">")[1:]
+        sys.stderr.write("\nConverting MSA to JSON\n")
+        alignmentJSON = {}
+        for line in tqdm(alignment):
+            split = line.splitlines()
+            title = split[0]
+            sequence = "".join(split[1:])
+            alignmentJSON[title] = sequence.upper()
+        return jsonify(alignmentJSON)
+    else:
+        return jsonify({"Result": "Not found"})
 
 @app.route('/upload_template', methods=['GET'])
 @cross_origin()
@@ -247,13 +251,19 @@ def retrieveAccessions(DOI):
     else:
         return jsonify({"studyAccessions": []})
 
-@app.route('/population_assembly_stats', methods=['GET'])
+@app.route('/population_assembly_stats/<species>', methods=['GET'])
 @cross_origin()
-def populationStats():
+def populationStats(species):
     """Send population assembly stats JSON file to frontend"""
-    with open(os.path.join(gene_dir, "population_assembly_stats.json")) as statsFile:
-        assemblyStats = json.loads(statsFile.read())
-    return jsonify(assemblyStats)
+    if species == "Streptococcus_pneumoniae":
+        with open(os.path.join(gene_dir, "SP_population_assembly_stats.json")) as statsFile:
+            assemblyStats = json.loads(statsFile.read())
+        return jsonify(assemblyStats)
+    if species == "Escherichia_coli":
+        with open(os.path.join(gene_dir, "ESC_population_assembly_stats.json")) as statsFile:
+            assemblyStats = json.loads(statsFile.read())
+        return jsonify(assemblyStats)
+    return jsonify({})
 
 if __name__ == "__main__":
     app.run(debug=False,use_reloader=False)
