@@ -1,7 +1,14 @@
-import cobs_index as cobs
+try: ## cobs_index is no longer supported, but try to import it if it is installed
+    import cobs_index as cobs
+except ImportError:
+    print("Warning: COBS not installed, genomic sequence search will not work")
+    pass
 from flask import Flask, request, jsonify, send_file, url_for, render_template
 from flask_cors import CORS, cross_origin
-from itsdangerous import TimedJSONWebSignatureSerializer as Serializer
+try:## for newer versions of itsdangerous
+    from itsdangerous import TimedJSONWebSignatureSerializer as Serializer
+except ImportError:
+    from itsdangerous import URLSafeTimedSerializer as Serializer
 import json
 import os
 import shutil
@@ -16,8 +23,7 @@ from bulk_download import getDownloadLink, send_email
 from index_query import geneQuery, specificGeneQuery, isolateQuery, specificIsolateQuery, indexAccessions, getStudyAccessions
 
 # data locations
-gene_dir = '/home/bacquerya-usr/' + os.environ.get('GENE_FILES')
-#gene_dir = "gene_test_files"
+gene_dir = os.environ.get('GENE_FILES')
 SECRET_KEY = os.environ.get('FLASK_SECRET_KEY')
 app = Flask(__name__, instance_relative_config=True)
 app.config.update(
@@ -165,7 +171,7 @@ def bulkDownload():
         s = Serializer(app.config['SECRET_KEY'], expires_in=60*60*24) # temporary URL live for 60 secs by 60 min by 24 hours
         token = s.dumps({'file_path': tarFilePath}).decode("utf-8")
         url_for('serve_file', token=token)
-        downloadURL = "https://bacquerya.azurewebsites.net:443/downloads/" + token
+        downloadURL = f"{os.getenv('DB_HOST_URL')}:{os.getenv('DB_HOST_PORT')}/downloads/" + token
         if not (urlDict["email"] == "Enter email" or urlDict["email"].replace(" ", "") == ""):
             send_email(urlDict["email"], downloadURL)
         shutil.rmtree(raw_temp_dir)
